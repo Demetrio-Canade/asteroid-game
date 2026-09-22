@@ -1,0 +1,68 @@
+/*
+ * Game Over — ciò che è solo suo.
+ *
+ * Il riquadro, le righe e la palette stanno in Terminal.uss, che GameOver.uxml
+ * carica prima di questo: è lo stesso terminale dell'HUD, spostato al centro.
+ * Qui ci sono il fondo scurito, i badge dei record e i due pulsanti.
+ */
+
+/* ---------- radice ---------- */
+
+/*
+ * Il fondo scurito non è decorazione: sotto c'è la scena ferma con la navicella
+ * distrutta, e senza un velo i numeri ci si perderebbero sopra.
+ */
+.gameover {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 6, 2, 0.72);
+}
+
+.gameover__panel {
+    min-width: 420px;
+    padding: 18px 26px 20px 24px;
+}
+
+.gameover__note {
+    color: rgb(255, 77, 77);
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+}
+
+/* Fra il blocco dei punti e quello del tempo: due letture, non una lista sola. */
+.gameover__gap {
+    height: 12px;
+}
+
+/* ---------- il badge del record ---------- */
+
+/*
+ * Nascosto finché non serve. Senza, due numeri uguali a schermo sarebbero
+ * ambigui: un pareggio col vecchio record ha lo stesso aspetto di un sorpasso.
+ */
+.badge {
+    display: none;
+    margin-left: 12px;
+    padding: 1px 7px 2px 7px;
+    color: rgb(8, 24, 14);
+    background-color: rgb(255, 176, 32);
+    font-size: 10px;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.badge.is-new {
+    display: flex;
+}
+
+/*
+ * I pulsanti — .actions, .button, .button--primary — stanno in Terminal.uss:
+ * li usa anche il menu, e due copie divergerebbero. Qui Retry porta la classe
+ * --primary perché è quello che il giocatore vuole nove volte su dieci.
+ */

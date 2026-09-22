@@ -1,0 +1,114 @@
+/*
+ * Il terminale di bordo: il linguaggio visivo condiviso dalle schermate.
+ *
+ * Lo caricano sia HUD.uxml sia GameOver.uxml, e domani il menu: la palette e la
+ * forma di una riga di log stanno scritte qui una volta sola, così due schermate
+ * non possono divergere senza che nessuno se ne accorga.
+ *
+ * Le colonne stanno dritte perché la chiave ha una larghezza fissa, non perché
+ * il font sia monospace: così l'aspetto regge con il font di default di Unity,
+ * senza importare nessun asset.
+ *
+ * La palette:
+ *   accento    rgb( 74, 222, 128)   verde fosforo
+ *   chiave     rgb( 47, 143,  87)   verde spento
+ *   valore     rgb(182, 255, 207)   verde chiaro
+ *   attenzione rgb(255, 176,  32)   ambra
+ *   allarme    rgb(255,  77,  77)   rosso
+ */
+
+/* ---------- il riquadro ---------- */
+
+.terminal {
+    padding: 10px 16px 12px 14px;
+    background-color: rgba(2, 18, 8, 0.62);
+    border-left-width: 2px;
+    border-left-color: rgba(74, 222, 128, 0.75);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-top-color: rgba(74, 222, 128, 0.18);
+    border-right-color: rgba(74, 222, 128, 0.18);
+    border-bottom-color: rgba(74, 222, 128, 0.18);
+}
+
+.terminal__header {
+    color: rgb(74, 222, 128);
+    font-size: 13px;
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+/* ---------- una riga di log ---------- */
+
+.row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+.row__key {
+    width: 132px;
+    color: rgb(47, 143, 87);
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.row__value {
+    color: rgb(182, 255, 207);
+    font-size: 13px;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+/* ---------- i pulsanti ---------- */
+
+/*
+ * Li usano il Game Over e il menu. Stanno qui e non nel foglio di una delle
+ * due schermate perché un pulsante deve avere lo stesso aspetto ovunque:
+ * due copie, prima o poi, diventano due verdi diversi.
+ */
+
+.actions {
+    flex-direction: row;
+    margin-top: 22px;
+}
+
+.button {
+    margin: 0 10px 0 0;
+    padding: 7px 20px 8px 20px;
+    color: rgb(182, 255, 207);
+    background-color: rgba(74, 222, 128, 0.10);
+    border-width: 1px;
+    border-color: rgba(74, 222, 128, 0.45);
+    border-radius: 0;
+    font-size: 13px;
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+}
+
+.button:hover {
+    background-color: rgba(74, 222, 128, 0.22);
+    border-color: rgb(74, 222, 128);
+}
+
+.button:active {
+    background-color: rgba(74, 222, 128, 0.36);
+}
+
+/* L'azione che il giocatore vuole quasi sempre: si vede di più. */
+.button--primary {
+    color: rgb(8, 24, 14);
+    background-color: rgb(74, 222, 128);
+    border-color: rgb(74, 222, 128);
+}
+
+.button--primary:hover {
+    background-color: rgb(134, 240, 172);
+    border-color: rgb(134, 240, 172);
+}
+
+.button--primary:active {
+    background-color: rgb(52, 190, 106);
+}

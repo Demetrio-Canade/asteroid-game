@@ -1,0 +1,45 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Terminal.uss" />
+    <Style src="project://database/Assets/UI/Game%20Over/GameOver.uss" />
+
+    <ui:VisualElement name="gameover-root" class="gameover">
+
+        <!-- Lo stesso terminale di bordo, che adesso riporta la fine della corsa. -->
+        <ui:VisualElement name="terminal" class="terminal gameover__panel">
+
+            <ui:Label class="terminal__header" text="&gt; SIGNAL LOST" />
+            <ui:Label class="gameover__note" text="&gt; HULL BREACH — RUN TERMINATED" />
+
+            <ui:VisualElement name="row-score" class="row">
+                <ui:Label class="row__key" text="&gt; SCORE" />
+                <ui:Label name="value-score" class="row__value" text="0" />
+                <ui:Label name="badge-score" class="badge" text="NEW RECORD" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-best-score" class="row">
+                <ui:Label class="row__key" text="&gt; BEST SCORE" />
+                <ui:Label name="value-best-score" class="row__value" text="0" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="gameover__gap" />
+
+            <ui:VisualElement name="row-time" class="row">
+                <ui:Label class="row__key" text="&gt; SURVIVED" />
+                <ui:Label name="value-time" class="row__value" text="00:00" />
+                <ui:Label name="badge-time" class="badge" text="NEW RECORD" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-best-time" class="row">
+                <ui:Label class="row__key" text="&gt; BEST TIME" />
+                <ui:Label name="value-best-time" class="row__value" text="00:00" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="actions">
+                <ui:Button name="button-retry" class="button button--primary" text="RETRY" />
+                <ui:Button name="button-menu" class="button" text="MAIN MENU" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

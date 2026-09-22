@@ -1,0 +1,45 @@
+/*
+ * Main Menu — ciò che è solo suo.
+ *
+ * Il riquadro, le righe, i pulsanti e la palette stanno in Terminal.uss, che
+ * MainMenu.uxml carica prima di questo: è lo stesso terminale di bordo delle
+ * altre due schermate. Qui ci sono il fondo e il titolo.
+ */
+
+.mainmenu {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(2, 8, 5);
+}
+
+/*
+ * Il titolo sta fuori dal riquadro: è il nome del gioco, non una riga di log.
+ * Ma tiene la stessa spaziatura fra le lettere del terminale, così i due
+ * appartengono allo stesso mondo.
+ */
+.mainmenu__title {
+    color: rgb(182, 255, 207);
+    font-size: 34px;
+    letter-spacing: 8px;
+    -unity-font-style: bold;
+    margin-bottom: 26px;
+}
+
+.mainmenu__panel {
+    min-width: 360px;
+    padding: 18px 26px 20px 24px;
+}
+
+/* Un pulsante solo: al centro, non spinto a sinistra come una fila di due. */
+.mainmenu .actions {
+    justify-content: center;
+}
+
+.mainmenu .button {
+    margin-right: 0;
+}

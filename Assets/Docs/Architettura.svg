@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1380" viewBox="0 0 1280 1380" font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#55606E"/>
+    </marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8A97A6"/>
+    </marker>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#B08528"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="1380" fill="#FFFFFF"/>
+
+  <!-- ============ CONNETTORE ============ -->
+  <rect x="340" y="40" width="600" height="180" rx="14" fill="#FFF6E5" stroke="#D9A036" stroke-width="2"/>
+  <text x="640" y="80" text-anchor="middle" font-size="27" font-weight="bold" fill="#1F2933">GameplayLogics</text>
+  <text x="640" y="104" text-anchor="middle" font-size="15" fill="#8A6D22">CONNETTORE</text>
+  <text x="640" y="134" text-anchor="middle" font-size="15" fill="#3D4753">avvia e chiude la partita · timer · punteggio · difficoltà · record</text>
+  <text x="640" y="156" text-anchor="middle" font-size="15" fill="#3D4753">spawna gli asteroidi riusando il pool, che è anche il registro</text>
+  <text x="640" y="178" text-anchor="middle" font-size="15" fill="#3D4753">smista i danni, proietta le minacce a schermo, alimenta le schermate</text>
+  <text x="640" y="204" text-anchor="middle" font-size="13" fill="#8A6D22">servizi suoi, non moduli: AsteroidPool · AsteroidSpawner · DifficultySettings</text>
+
+  <!-- raccordi verso i moduli -->
+  <path d="M640,220 V236 H340 V296" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+  <path d="M640,236 H940 V296" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+  <text x="352" y="272" font-size="14" fill="#6B7785">chiama gli Inputs, ascolta gli Outputs</text>
+  <text x="928" y="272" text-anchor="end" font-size="14" fill="#6B7785">chiama gli Inputs, ascolta gli Outputs</text>
+
+  <!-- ============ MODULO PLAYER ============ -->
+  <rect x="110" y="300" width="460" height="472" rx="14" fill="#F2F7FE" stroke="#5B87C4" stroke-width="2"/>
+  <text x="340" y="340" text-anchor="middle" font-size="24" font-weight="bold" fill="#1F2933">PLAYER</text>
+  <text x="340" y="362" text-anchor="middle" font-size="14" fill="#5C7595">modulo · Player.prefab</text>
+  <line x1="130" y1="380" x2="550" y2="380" stroke="#BBD0E8" stroke-width="1.5"/>
+
+  <text x="340" y="408" text-anchor="middle" font-size="15" fill="#2F6BB3" font-weight="bold">INPUTS</text>
+  <text x="340" y="428" text-anchor="middle" font-size="14" fill="#4A5563">Spawn · ApplyDamage</text>
+  <path d="M340,438 V464" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+
+  <rect x="190" y="470" width="300" height="54" rx="8" fill="#FFFFFF" stroke="#8FADD1" stroke-width="1.8"/>
+  <text x="340" y="492" text-anchor="middle" font-size="17" font-weight="bold" fill="#1F2933">PlayerManager</text>
+  <text x="340" y="512" text-anchor="middle" font-size="13" fill="#6B7785">riceve e smista, non elabora</text>
+  <path d="M340,524 V552" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+
+  <rect x="136" y="558" width="186" height="54" rx="8" fill="#FFFFFF" stroke="#8FADD1" stroke-width="1.8"/>
+  <text x="229" y="580" text-anchor="middle" font-size="16" font-weight="bold" fill="#1F2933">PlayerLogics</text>
+  <text x="229" y="600" text-anchor="middle" font-size="13" fill="#6B7785">elaborazione</text>
+  <rect x="358" y="558" width="186" height="54" rx="8" fill="#FFFFFF" stroke="#8FADD1" stroke-width="1.8"/>
+  <text x="451" y="580" text-anchor="middle" font-size="16" font-weight="bold" fill="#1F2933">PlayerState</text>
+  <text x="451" y="600" text-anchor="middle" font-size="13" fill="#6B7785">dati</text>
+  <path d="M328,585 H352" fill="none" stroke="#8A97A6" stroke-width="1.8" marker-start="url(#b)" marker-end="url(#b)"/>
+  <path d="M229,612 V640" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+
+  <rect x="150" y="646" width="380" height="54" rx="8" fill="#FFFFFF" stroke="#8FADD1" stroke-width="1.8"/>
+  <text x="340" y="668" text-anchor="middle" font-size="16" font-weight="bold" fill="#1F2933">Componenti</text>
+  <text x="340" y="688" text-anchor="middle" font-size="13" fill="#6B7785">Turret · AimLook · PlayerInput · Health · Radar</text>
+  <path d="M340,700 V726" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+
+  <text x="340" y="746" text-anchor="middle" font-size="15" fill="#2F6BB3" font-weight="bold">OUTPUTS</text>
+  <text x="340" y="764" text-anchor="middle" font-size="14" fill="#4A5563">OnDied · OnAsteroidHit(nome, danno) · Snapshot</text>
+
+  <text x="340" y="792" text-anchor="middle" font-size="13" fill="#8A6D22">Il radar è suo: le minacce escono nello Snapshot, in coordinate di mondo.</text>
+
+  <!-- ============ MODULO ASTEROID ============ -->
+  <rect x="710" y="300" width="460" height="472" rx="14" fill="#F2F7FE" stroke="#5B87C4" stroke-width="2"/>
+  <text x="940" y="340" text-anchor="middle" font-size="24" font-weight="bold" fill="#1F2933">ASTEROID</text>
+  <text x="940" y="362" text-anchor="middle" font-size="14" fill="#5C7595">modulo · Asteroid.prefab</text>
+  <line x1="730" y1="380" x2="1150" y2="380" stroke="#BBD0E8" stroke-width="1.5"/>
+
+  <text x="940" y="408" text-anchor="middle" font-size="15" fill="#2F6BB3" font-weight="bold">INPUTS</text>
+  <text x="940" y="428" text-anchor="middle" font-size="14" fill="#4A5563">Spawn · ApplyDamage · Kill · Despawn</text>
+  <path d="M940,438 V464" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+
+  <rect x="790" y="470" width="300" height="54" rx="8" fill="#FFFFFF" stroke="#8FADD1" stroke-width="1.8"/>
+  <text x="940" y="492" text-anchor="middle" font-size="17" font-weight="bold" fill="#1F2933">AsteroidManager</text>
+  <text x="940" y="512" text-anchor="middle" font-size="13" fill="#6B7785">riceve e smista, non elabora</text>
+  <path d="M940,524 V552" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+
+  <rect x="736" y="558" width="186" height="54" rx="8" fill="#FFFFFF" stroke="#8FADD1" stroke-width="1.8"/>
+  <text x="829" y="580" text-anchor="middle" font-size="16" font-weight="bold" fill="#1F2933">AsteroidLogics</text>
+  <text x="829" y="600" text-anchor="middle" font-size="13" fill="#6B7785">elaborazione</text>
+  <rect x="958" y="558" width="186" height="54" rx="8" fill="#FFFFFF" stroke="#8FADD1" stroke-width="1.8"/>
+  <text x="1051" y="580" text-anchor="middle" font-size="16" font-weight="bold" fill="#1F2933">AsteroidState</text>
+  <text x="1051" y="600" text-anchor="middle" font-size="13" fill="#6B7785">dati + Id + rotta</text>
+  <path d="M928,585 H952" fill="none" stroke="#8A97A6" stroke-width="1.8" marker-start="url(#b)" marker-end="url(#b)"/>
+  <path d="M829,612 V640" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+
+  <rect x="750" y="646" width="380" height="54" rx="8" fill="#FFFFFF" stroke="#8FADD1" stroke-width="1.8"/>
+  <text x="940" y="668" text-anchor="middle" font-size="16" font-weight="bold" fill="#1F2933">Componenti</text>
+  <text x="940" y="688" text-anchor="middle" font-size="13" fill="#6B7785">Movimento · MeshVariant · Impatto · Effects · Health</text>
+  <path d="M940,700 V726" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+
+  <text x="940" y="746" text-anchor="middle" font-size="15" fill="#2F6BB3" font-weight="bold">OUTPUTS</text>
+  <text x="940" y="764" text-anchor="middle" font-size="14" fill="#4A5563">OnDied(causa) · OnImpact · OnOutOfBounds</text>
+
+  <text x="940" y="792" text-anchor="middle" font-size="13" fill="#8A6D22">Impatto sta sul root, accanto al Rigidbody: i trigger arrivano lì.</text>
+
+  <!-- ============ IRADARCONTACT: L'UNICO CONTATTO FRA I DUE MODULI ============ -->
+  <path d="M574,673 H706" fill="none" stroke="#8A97A6" stroke-width="1.8" stroke-dasharray="5 4" marker-start="url(#b)" marker-end="url(#b)"/>
+  <text x="640" y="662" text-anchor="middle" font-size="12" font-weight="bold" fill="#6B7785">IRadarContact</text>
+  <text x="640" y="690" text-anchor="middle" font-size="11" fill="#8A97A6">senza conoscersi</text>
+
+  <!-- ============ RACCORDI VERSO LE SCHERMATE ============ -->
+  <path d="M340,116 H60 V886 H104" fill="none" stroke="#55606E" stroke-width="2" marker-end="url(#a)"/>
+  <text x="128" y="836" font-size="14" fill="#6B7785">gli passa una fotografia già pronta, non lo interroga mai</text>
+
+  <path d="M940,116 H1224 V886 H1176" fill="none" stroke="#55606E" stroke-width="2" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="1152" y="836" text-anchor="end" font-size="14" fill="#6B7785">gli passa il bilancio, e ascolta il Retry</text>
+
+  <!-- ============ MODULO HUD ============ -->
+  <rect x="110" y="850" width="520" height="180" rx="14" fill="#F2F7FE" stroke="#5B87C4" stroke-width="2"/>
+  <text x="370" y="886" text-anchor="middle" font-size="24" font-weight="bold" fill="#1F2933">HUD</text>
+  <text x="370" y="908" text-anchor="middle" font-size="14" fill="#5C7595">modulo · HUD.uxml / HUD.uss</text>
+  <line x1="130" y1="924" x2="610" y2="924" stroke="#BBD0E8" stroke-width="1.5"/>
+  <text x="370" y="948" text-anchor="middle" font-size="15" fill="#2F6BB3" font-weight="bold">INPUTS</text>
+  <text x="370" y="968" text-anchor="middle" font-size="14" fill="#4A5563">Show · Hide · Present(snapshot)</text>
+  <text x="370" y="998" text-anchor="middle" font-size="13" fill="#8A6D22">Nessun Output e nessuno State, ma l'unica schermata con un Logics: è l'unica che elabora.</text>
+  <text x="370" y="1018" text-anchor="middle" font-size="13" fill="#8A6D22">Si alimenta a ogni frame: terminale, mirino e marcatori d'impatto.</text>
+
+  <!-- ============ MODULO GAME OVER ============ -->
+  <rect x="650" y="850" width="520" height="180" rx="14" fill="#F2F7FE" stroke="#5B87C4" stroke-width="2"/>
+  <text x="910" y="886" text-anchor="middle" font-size="24" font-weight="bold" fill="#1F2933">GAME OVER</text>
+  <text x="910" y="908" text-anchor="middle" font-size="14" fill="#5C7595">modulo · GameOver.uxml / GameOver.uss</text>
+  <line x1="670" y1="924" x2="1150" y2="924" stroke="#BBD0E8" stroke-width="1.5"/>
+  <text x="782" y="948" text-anchor="middle" font-size="15" fill="#2F6BB3" font-weight="bold">INPUTS</text>
+  <text x="782" y="968" text-anchor="middle" font-size="14" fill="#4A5563">Show(bilancio) · Hide</text>
+  <text x="1040" y="948" text-anchor="middle" font-size="15" fill="#2F6BB3" font-weight="bold">OUTPUT</text>
+  <text x="1040" y="968" text-anchor="middle" font-size="14" fill="#4A5563">OnRetryRequested</text>
+  <text x="910" y="998" text-anchor="middle" font-size="13" fill="#8A6D22">Riceve i dati insieme all'ordine di mostrarsi: mai a schermo senza niente da dire.</text>
+  <text x="910" y="1018" text-anchor="middle" font-size="13" fill="#8A6D22">Nessuno State e nessun Logics: due Inputs, un Output, e in mezzo quattro numeri da scrivere.</text>
+
+  <!-- ============ SEPARAZIONE FRA LE SCENE ============ -->
+  <line x1="60" y1="1080" x2="1224" y2="1080" stroke="#C3CBD5" stroke-width="2" stroke-dasharray="9 7"/>
+  <text x="1224" y="1070" text-anchor="end" font-size="14" font-weight="bold" fill="#8A97A6">SCENA CoreLoop</text>
+  <text x="1224" y="1104" text-anchor="end" font-size="14" font-weight="bold" fill="#8A97A6">SCENA MainMenu</text>
+
+  <!-- ============ MODULO MAIN MENU ============ -->
+  <rect x="390" y="1130" width="500" height="176" rx="14" fill="#F2F7FE" stroke="#5B87C4" stroke-width="2"/>
+  <text x="640" y="1166" text-anchor="middle" font-size="24" font-weight="bold" fill="#1F2933">MAIN MENU</text>
+  <text x="640" y="1188" text-anchor="middle" font-size="14" fill="#5C7595">modulo · MainMenu.uxml / MainMenu.uss</text>
+  <line x1="410" y1="1204" x2="870" y2="1204" stroke="#BBD0E8" stroke-width="1.5"/>
+  <text x="640" y="1228" text-anchor="middle" font-size="15" fill="#2F6BB3" font-weight="bold">NÉ INPUTS NÉ OUTPUTS</text>
+  <text x="640" y="1248" text-anchor="middle" font-size="14" fill="#4A5563">si riempie da solo al primo frame, e resta</text>
+  <text x="640" y="1276" text-anchor="middle" font-size="13" fill="#8A6D22">Nessuno State e nessun Logics: è il solo Manager. In questa scena non c'è un connettore,</text>
+  <text x="640" y="1294" text-anchor="middle" font-size="13" fill="#8A6D22">e un solo modulo non ha nessuno con cui essere collegato.</text>
+
+  <!-- ============ PERSISTENZA ============ -->
+  <rect x="110" y="1034" width="240" height="110" rx="14" fill="#FFF6E5" stroke="#D9A036" stroke-width="2"/>
+  <text x="230" y="1066" text-anchor="middle" font-size="19" font-weight="bold" fill="#1F2933">BestRun</text>
+  <text x="230" y="1088" text-anchor="middle" font-size="13" fill="#8A6D22">PERSISTENZA</text>
+  <text x="230" y="1110" text-anchor="middle" font-size="13" fill="#3D4753">punteggio e tempo migliori,</text>
+  <text x="230" y="1126" text-anchor="middle" font-size="13" fill="#3D4753">indipendenti fra loro</text>
+
+  <path d="M60,886 V1080 H104" fill="none" stroke="#B08528" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#c)"/>
+  <path d="M290,1144 V1216 H384" fill="none" stroke="#B08528" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#c)"/>
+  <text x="278" y="1174" text-anchor="end" font-size="13" fill="#B08528">lo scrive il connettore a fine partita,</text>
+  <text x="278" y="1192" text-anchor="end" font-size="13" fill="#B08528">lo rilegge il menu al primo frame</text>
+
+  <!-- note -->
+  <text x="640" y="1348" text-anchor="middle" font-size="16" fill="#8A6D22">Fra i moduli non c'è nessuna freccia di gioco: non si conoscono. Tutto passa dal connettore, salvo due cose:</text>
+  <text x="640" y="1370" text-anchor="middle" font-size="16" fill="#8A6D22">la navigazione fra scene (Play e Main Menu sono il pulsante stesso) e il radar, che vede corpi via IRadarContact.</text>
+</svg>

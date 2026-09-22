@@ -1,0 +1,153 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Terminal.uss" />
+    <Style src="project://database/Assets/UI/HUD/HUD.uss" />
+
+    <ui:VisualElement name="hud-root" class="hud" picking-mode="Ignore">
+
+        <!-- Il terminale di bordo: righe di log, tutte in alto a sinistra. -->
+        <ui:VisualElement name="terminal" class="terminal" picking-mode="Ignore">
+
+            <ui:Label class="terminal__header" text="&gt; SHIP TERMINAL // ONLINE" />
+
+            <ui:VisualElement name="row-time" class="row">
+                <ui:Label class="row__key" text="&gt; T+" />
+                <ui:Label name="value-time" class="row__value" text="00:00" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-score" class="row">
+                <ui:Label class="row__key" text="&gt; SCORE" />
+                <ui:Label name="value-score" class="row__value" text="0" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-level" class="row">
+                <ui:Label class="row__key" text="&gt; THREAT LVL" />
+                <ui:Label name="value-level" class="row__value" text="1/5" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-hull" class="row">
+                <ui:Label class="row__key" text="&gt; HULL" />
+                <ui:VisualElement class="bar">
+                    <ui:VisualElement name="fill-hull" class="bar__fill" />
+                </ui:VisualElement>
+                <ui:Label name="value-hull" class="row__value" text="5/5" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-weapon" class="row">
+                <ui:Label class="row__key" text="&gt; WEAPON" />
+                <ui:Label name="value-weapon" class="row__value" text="MACHINE GUN" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-machinegun" class="row">
+                <ui:Label class="row__key" text="&gt; MG HEAT" />
+                <ui:VisualElement class="bar">
+                    <ui:VisualElement name="fill-machinegun" class="bar__fill" />
+                </ui:VisualElement>
+                <ui:Label name="value-machinegun" class="row__value" text="0%" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-cannon" class="row">
+                <ui:Label class="row__key" text="&gt; CANNON" />
+                <ui:VisualElement class="bar">
+                    <ui:VisualElement name="fill-cannon" class="bar__fill" />
+                </ui:VisualElement>
+                <ui:Label name="value-cannon" class="row__value" text="READY" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!--
+            Gli avvisi d'impatto: chi sta per colpire la navicella, inseguito a
+            schermo, con i secondi che mancano.
+
+            I marcatori ci sono sempre tutti, come i due reticoli qui sotto: il
+            codice ne accende quanti gliene servono e spegne gli altri, e a
+            mostrarli è l'USS. Quanti siano lo decide questo file e nessun altro
+            — Logics li conta all'aggancio. Aggiungerne uno vuol dire copiare un
+            blocco qui, e basta.
+
+            Stanno prima del mirino perché il mirino deve restare sopra: quello
+            si guarda sempre, questi arrivano e passano.
+        -->
+        <ui:VisualElement name="threats" class="threats" picking-mode="Ignore">
+
+            <ui:VisualElement class="threat" picking-mode="Ignore">
+                <ui:VisualElement class="threat__corner threat__corner--tl" />
+                <ui:VisualElement class="threat__corner threat__corner--tr" />
+                <ui:VisualElement class="threat__corner threat__corner--bl" />
+                <ui:VisualElement class="threat__corner threat__corner--br" />
+                <ui:Label class="threat__timer" text="0.0" />
+            </ui:VisualElement>
+            <ui:VisualElement class="threat" picking-mode="Ignore">
+                <ui:VisualElement class="threat__corner threat__corner--tl" />
+                <ui:VisualElement class="threat__corner threat__corner--tr" />
+                <ui:VisualElement class="threat__corner threat__corner--bl" />
+                <ui:VisualElement class="threat__corner threat__corner--br" />
+                <ui:Label class="threat__timer" text="0.0" />
+            </ui:VisualElement>
+            <ui:VisualElement class="threat" picking-mode="Ignore">
+                <ui:VisualElement class="threat__corner threat__corner--tl" />
+                <ui:VisualElement class="threat__corner threat__corner--tr" />
+                <ui:VisualElement class="threat__corner threat__corner--bl" />
+                <ui:VisualElement class="threat__corner threat__corner--br" />
+                <ui:Label class="threat__timer" text="0.0" />
+            </ui:VisualElement>
+            <ui:VisualElement class="threat" picking-mode="Ignore">
+                <ui:VisualElement class="threat__corner threat__corner--tl" />
+                <ui:VisualElement class="threat__corner threat__corner--tr" />
+                <ui:VisualElement class="threat__corner threat__corner--bl" />
+                <ui:VisualElement class="threat__corner threat__corner--br" />
+                <ui:Label class="threat__timer" text="0.0" />
+            </ui:VisualElement>
+            <ui:VisualElement class="threat" picking-mode="Ignore">
+                <ui:VisualElement class="threat__corner threat__corner--tl" />
+                <ui:VisualElement class="threat__corner threat__corner--tr" />
+                <ui:VisualElement class="threat__corner threat__corner--bl" />
+                <ui:VisualElement class="threat__corner threat__corner--br" />
+                <ui:Label class="threat__timer" text="0.0" />
+            </ui:VisualElement>
+            <ui:VisualElement class="threat" picking-mode="Ignore">
+                <ui:VisualElement class="threat__corner threat__corner--tl" />
+                <ui:VisualElement class="threat__corner threat__corner--tr" />
+                <ui:VisualElement class="threat__corner threat__corner--bl" />
+                <ui:VisualElement class="threat__corner threat__corner--br" />
+                <ui:Label class="threat__timer" text="0.0" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!--
+            Il mirino: sostituisce il cursore e sta dove finisce il colpo.
+            Questo elemento è il punto di mira e basta — è l'unico che Logics
+            sposta. Il disegno sta nei due reticoli qui dentro, e quale dei due
+            si accenda lo decide l'USS a partire dalla classe dell'arma.
+        -->
+        <ui:VisualElement name="crosshair" class="crosshair" picking-mode="Ignore">
+
+            <!-- Mitraglietta: leggero e stretto, si spara a raffica. -->
+            <ui:VisualElement class="reticle reticle--machinegun">
+                <ui:VisualElement class="reticle__tick reticle__tick--top" />
+                <ui:VisualElement class="reticle__tick reticle__tick--bottom" />
+                <ui:VisualElement class="reticle__tick reticle__tick--left" />
+                <ui:VisualElement class="reticle__tick reticle__tick--right" />
+                <ui:VisualElement class="reticle__dot" />
+            </ui:VisualElement>
+
+            <!-- Cannone: anello e tacche esterne, il colpo va piazzato. -->
+            <ui:VisualElement class="reticle reticle--cannon">
+                <ui:VisualElement class="reticle__ring" />
+                <ui:VisualElement class="reticle__tick reticle__tick--top" />
+                <ui:VisualElement class="reticle__tick reticle__tick--bottom" />
+                <ui:VisualElement class="reticle__tick reticle__tick--left" />
+                <ui:VisualElement class="reticle__tick reticle__tick--right" />
+                <ui:VisualElement class="reticle__dot" />
+            </ui:VisualElement>
+
+            <!-- Quanto manca al prossimo colpo: c'è solo mentre ricarica. -->
+            <ui:VisualElement class="charge">
+                <ui:VisualElement name="fill-charge" class="charge__fill" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

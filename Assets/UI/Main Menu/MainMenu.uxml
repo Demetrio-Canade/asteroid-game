@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Terminal.uss" />
+    <Style src="project://database/Assets/UI/Main%20Menu/MainMenu.uss" />
+
+    <ui:VisualElement name="mainmenu-root" class="mainmenu">
+
+        <ui:Label class="mainmenu__title" text="ASTEROID DEFENSE" />
+
+        <!-- Lo stesso terminale di bordo: la nave è già accesa, si aspetta l'ordine. -->
+        <ui:VisualElement name="terminal" class="terminal mainmenu__panel">
+
+            <ui:Label class="terminal__header" text="&gt; SHIP TERMINAL // STANDBY" />
+
+            <ui:VisualElement name="row-best-score" class="row">
+                <ui:Label class="row__key" text="&gt; BEST SCORE" />
+                <ui:Label name="value-best-score" class="row__value" text="0" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-best-time" class="row">
+                <ui:Label class="row__key" text="&gt; BEST TIME" />
+                <ui:Label name="value-best-time" class="row__value" text="00:00" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="actions">
+                <ui:Button name="button-play" class="button button--primary" text="PLAY" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

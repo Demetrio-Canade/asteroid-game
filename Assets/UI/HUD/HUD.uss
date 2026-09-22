@@ -1,0 +1,335 @@
+/*
+ * HUD — ciò che è solo suo.
+ *
+ * Il riquadro del terminale, le righe e la palette stanno in Terminal.uss, che
+ * HUD.uxml carica prima di questo: qui ci sono le barre, il mirino e le soglie
+ * di colore, che nessun'altra schermata usa.
+ *
+ * Le soglie sono classi (is-warn, is-critical, is-blocked) che il codice accende
+ * e spegne: i colori non compaiono mai in C#.
+ */
+
+/* ---------- radice ---------- */
+
+.hud {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* Il terminale dell'HUD sta ancorato in alto a sinistra sopra il gioco. */
+
+.terminal {
+    position: absolute;
+    left: 24px;
+    top: 24px;
+}
+
+/* ---------- le barre ---------- */
+
+.bar {
+    width: 96px;
+    height: 8px;
+    margin-right: 10px;
+    background-color: rgba(74, 222, 128, 0.14);
+    border-width: 1px;
+    border-color: rgba(74, 222, 128, 0.35);
+}
+
+.bar__fill {
+    width: 0;
+    height: 100%;
+    background-color: rgb(74, 222, 128);
+}
+
+/* ---------- soglie ---------- */
+
+.row.is-warn > .row__value {
+    color: rgb(255, 176, 32);
+}
+
+.row.is-warn .bar__fill {
+    background-color: rgb(255, 176, 32);
+}
+
+.row.is-critical > .row__value {
+    color: rgb(255, 77, 77);
+}
+
+.row.is-critical .bar__fill {
+    background-color: rgb(255, 77, 77);
+}
+
+/* ---------- il mirino ---------- */
+
+/*
+ * Il wrapper è il punto di mira e nient'altro: niente dimensioni, così i due
+ * reticoli possono essere grandi quanto vogliono restando centrati sullo stesso
+ * punto. È l'unico elemento che il codice sposta.
+ */
+.crosshair {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+}
+
+.reticle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    translate: -50% -50%;
+}
+
+.reticle--machinegun {
+    width: 26px;
+    height: 26px;
+}
+
+.reticle--cannon {
+    width: 40px;
+    height: 40px;
+}
+
+/* Uno alla volta. Logics dice quale arma, la scelta del reticolo sta qui. */
+
+.crosshair .reticle--cannon {
+    display: none;
+}
+
+.crosshair.is-cannon .reticle--machinegun {
+    display: none;
+}
+
+.crosshair.is-cannon .reticle--cannon {
+    display: flex;
+}
+
+/* ---------- le parti di un reticolo ---------- */
+
+.reticle__ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-width: 2px;
+    border-color: rgb(74, 222, 128);
+    border-radius: 20px;
+}
+
+.reticle__tick {
+    position: absolute;
+    background-color: rgb(74, 222, 128);
+}
+
+.reticle__tick--top,
+.reticle__tick--bottom {
+    left: 50%;
+    width: 2px;
+    height: 7px;
+    translate: -50% 0;
+}
+
+.reticle__tick--left,
+.reticle__tick--right {
+    top: 50%;
+    width: 7px;
+    height: 2px;
+    translate: 0 -50%;
+}
+
+/* Mitraglietta: le tacche stanno sul bordo del riquadro. */
+
+.reticle--machinegun .reticle__tick--top {
+    top: 0;
+}
+
+.reticle--machinegun .reticle__tick--bottom {
+    bottom: 0;
+}
+
+.reticle--machinegun .reticle__tick--left {
+    left: 0;
+}
+
+.reticle--machinegun .reticle__tick--right {
+    right: 0;
+}
+
+/* Cannone: stanno fuori dall'anello, staccate di 2px. */
+
+.reticle--cannon .reticle__tick--top {
+    top: -9px;
+}
+
+.reticle--cannon .reticle__tick--bottom {
+    bottom: -9px;
+}
+
+.reticle--cannon .reticle__tick--left {
+    left: -9px;
+}
+
+.reticle--cannon .reticle__tick--right {
+    right: -9px;
+}
+
+.reticle__dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 3px;
+    height: 3px;
+    background-color: rgb(182, 255, 207);
+    translate: -50% -50%;
+}
+
+/* ---------- la ricarica del cannone ---------- */
+
+/*
+ * Compare solo mentre il cannone ricarica: una barra sempre piena sotto il
+ * mirino sarebbe rumore. Stessi colori della riga CANNON del terminale —
+ * ambra mentre recupera — perché è la stessa cosa detta più vicino al bersaglio.
+ */
+.charge {
+    position: absolute;
+    left: 0;
+    top: 28px;
+    width: 44px;
+    height: 3px;
+    translate: -50% 0;
+    background-color: rgba(74, 222, 128, 0.14);
+    border-width: 1px;
+    border-color: rgba(74, 222, 128, 0.35);
+    display: none;
+}
+
+.crosshair.is-charging .charge {
+    display: flex;
+}
+
+.charge__fill {
+    width: 0;
+    height: 100%;
+    background-color: rgb(255, 176, 32);
+}
+
+/* L'arma in mano non può sparare: premere adesso non serve a niente. */
+
+.crosshair.is-blocked .reticle__tick {
+    background-color: rgb(255, 77, 77);
+}
+
+.crosshair.is-blocked .reticle__dot {
+    background-color: rgb(255, 77, 77);
+}
+
+.crosshair.is-blocked .reticle__ring {
+    border-color: rgb(255, 77, 77);
+}
+
+/* ---------- gli avvisi d'impatto ---------- */
+
+/*
+ * Un marcatore per ogni asteroide che sta per colpire. Ci sono sempre tutti:
+ * il codice sposta quelli che servono e accende is-visible, e a farli comparire
+ * è questa regola. Nessun colore e nessuna misura passano dal C#.
+ *
+ * Ambra come la riga CANNON del terminale finché c'è tempo, rossa sotto il
+ * secondo: è la stessa scala di gravità delle barre, detta addosso al bersaglio.
+ */
+
+.threats {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/*
+ * Il codice scrive left e top; il translate porta il centro del riquadro sul
+ * punto, così il marcatore sta addosso all'asteroide e non di fianco.
+ */
+.threat {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 46px;
+    height: 46px;
+    translate: -50% -50%;
+    display: none;
+}
+
+.threat.is-visible {
+    display: flex;
+}
+
+/* ---------- le parti di un marcatore ---------- */
+
+/*
+ * Quattro angoli e non un riquadro chiuso: un bordo intero coprirebbe la sagoma
+ * dell'asteroide, che è la cosa a cui bisogna sparare.
+ */
+.threat__corner {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    border-color: rgb(255, 176, 32);
+}
+
+.threat__corner--tl {
+    left: 0;
+    top: 0;
+    border-left-width: 2px;
+    border-top-width: 2px;
+}
+
+.threat__corner--tr {
+    right: 0;
+    top: 0;
+    border-right-width: 2px;
+    border-top-width: 2px;
+}
+
+.threat__corner--bl {
+    left: 0;
+    bottom: 0;
+    border-left-width: 2px;
+    border-bottom-width: 2px;
+}
+
+.threat__corner--br {
+    right: 0;
+    bottom: 0;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+}
+
+/* Il conto alla rovescia sta sotto il riquadro, centrato sullo stesso punto. */
+.threat__timer {
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    translate: -50% 3px;
+    color: rgb(255, 176, 32);
+    font-size: 12px;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* Sotto il secondo non c'è più tempo per scegliere: allarme. */
+
+.threat.is-imminent .threat__corner {
+    border-color: rgb(255, 77, 77);
+}
+
+.threat.is-imminent .threat__timer {
+    color: rgb(255, 77, 77);
+}
