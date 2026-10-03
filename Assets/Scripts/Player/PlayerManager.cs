@@ -18,6 +18,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private PlayerInputComponent input;
     [SerializeField] private HealthComponent health;
     [SerializeField] private RadarComponent radar;
+    [SerializeField] private FeedbackComponent feedback;
 
     private PlayerLogics logics;
 
@@ -48,9 +49,15 @@ public class PlayerManager : MonoBehaviour
             Debug.LogWarning($"{Tag} il campo 'radar' non è collegato: la navicella non vedrà arrivare niente.");
         }
 
-        logics = new PlayerLogics(state, aimLook, turret, input, health, radar);
+        if (feedback == null)
+        {
+            Debug.LogWarning($"{Tag} il campo 'feedback' non è collegato: gli spari non si faranno sentire.");
+        }
+
+        logics = new PlayerLogics(state, aimLook, turret, input, health, radar, feedback);
         logics.OnDied += HandleDied;
         logics.OnAsteroidHit += HandleAsteroidHit;
+        logics.OnCannonReady += HandleCannonReady;
 
         // Prima dello Spawn non si mira e non si spara.
         if (aimLook != null)
@@ -83,6 +90,7 @@ public class PlayerManager : MonoBehaviour
 
         logics.OnDied -= HandleDied;
         logics.OnAsteroidHit -= HandleAsteroidHit;
+        logics.OnCannonReady -= HandleCannonReady;
     }
 
     private void Update()
@@ -115,6 +123,9 @@ public class PlayerManager : MonoBehaviour
     /// <summary>La torretta ha colpito il root indicato per la quantità di danno indicata.</summary>
     public event Action<string, float> OnAsteroidHit;
 
+    /// <summary>Il cannone ha finito di ricaricare ed è di nuovo pronto a sparare.</summary>
+    public event Action OnCannonReady;
+
     /// <summary>
     /// Come sta la navicella adesso, in sola lettura. Non è un evento perché non
     /// è un fatto: è una condizione, e chi la disegna la ridisegna a ogni frame.
@@ -141,5 +152,10 @@ public class PlayerManager : MonoBehaviour
     private void HandleAsteroidHit(string asteroidId, float damage)
     {
         OnAsteroidHit?.Invoke(asteroidId, damage);
+    }
+
+    private void HandleCannonReady()
+    {
+        OnCannonReady?.Invoke();
     }
 }

@@ -76,4 +76,14 @@ public class HudManager : MonoBehaviour
     {
         Logics.Present(snapshot);
     }
+
+    /// <summary>
+    /// Un fatto appena successo, da annunciare una volta. Non viaggia nella
+    /// fotografia perché non è una condizione da ridisegnare a ogni frame: è
+    /// qualcosa che succede, e si dice quando succede.
+    /// </summary>
+    public void Notify(HudNotice notice)
+    {
+        Logics.Notify(notice);
+    }
 }

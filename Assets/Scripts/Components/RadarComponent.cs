@@ -99,6 +99,9 @@ public class RadarComponent : MonoBehaviour
     private float sweepTimer;
     private bool active;
 
+    /// <summary>Quanti contatti nuovi ha trovato la spazzata in corso.</summary>
+    private int acquiredThisSweep;
+
     private void Awake()
     {
         sweepBuffer = new Collider[SweepBufferSize];
@@ -143,6 +146,13 @@ public class RadarComponent : MonoBehaviour
     }
 
     // ---------- OUTPUT ----------
+
+    /// <summary>
+    /// La spazzata ha agganciato contatti che prima non c'erano: quanti.
+    /// Parte una volta per spazzata e non una per contatto, così chi lo
+    /// ascolta non riceve una raffica di notizie nello stesso istante.
+    /// </summary>
+    public event Action<int> OnContactsAcquired;
 
     /// <summary>
     /// I contatti in rotta di collisione adesso, dal più imminente in poi.
@@ -226,6 +236,8 @@ public class RadarComponent : MonoBehaviour
             return;
         }
 
+        acquiredThisSweep = 0;
+
         foreach (BoxCollider plate in plates)
         {
             if (plate == null)
@@ -234,6 +246,11 @@ public class RadarComponent : MonoBehaviour
             }
 
             SweepCorridor(plate);
+        }
+
+        if (acquiredThisSweep > 0)
+        {
+            OnContactsAcquired?.Invoke(acquiredThisSweep);
         }
     }
 
@@ -305,6 +322,14 @@ public class RadarComponent : MonoBehaviour
         if (!TimeToImpact(source, out float seconds))
         {
             return;
+        }
+
+        // Nuovo è chi non è nel registro. Un corpo del pool che torna in campo
+        // ci rientra da nuovo, perché Collect l'aveva già tolto quando era
+        // sparito: è un altro volo, ed è giusto annunciarlo di nuovo.
+        if (!tracked.ContainsKey(source.Id))
+        {
+            acquiredThisSweep++;
         }
 
         tracked[source.Id] = new Tracked(source, Time.time + seconds);

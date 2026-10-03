@@ -116,7 +116,9 @@ Assets/Scripts/
 ├── Asteroid/       ← Manager, Logics, State dell'Asteroid
 ├── Hud/            ← Manager e Logics dell'HUD
 ├── GameOver/       ← Manager del Game Over
-└── MainMenu/       ← Manager del Main Menu
+├── MainMenu/       ← Manager del Main Menu
+└── Editor/         ← strumenti che girano solo nell'Editor: VfxBuilder costruisce
+                      materiali e prefab degli effetti in Assets/VFX
 
 Assets/UI/          ← una cartella per schermata (.uxml + .uss), più Terminal.uss
                       e le Panel Settings
@@ -185,6 +187,16 @@ prima»: la minaccia compare quando entra in portata, quindi un corpo veloce si 
 più lontano di uno lento. La portata è una proprietà della navicella, e come tale un
 domani può degradarsi coi danni o migliorare con un potenziamento.
 
+**Il feedback è del Player, e non tocca la scena.** Come si vedono e si sentono gli
+eventi della navicella — sparo, cambio arma, ricarica, surriscaldamento, aggancio del
+radar, colpi subiti — lo decide `FeedbackComponent`, a cui `PlayerLogics` inoltra gli
+Outputs di torretta e radar e il danno che incassa. Loro dicono cosa è successo e basta.
+Anche qui vale la distinzione fra condizioni e fatti: la vita che resta lascia addosso
+un vignetting di base, il colpo subito ci aggiunge un impulso che poi torna giù. Il bagliore passa da un Volume che
+sta nel prefab e che si somma a quello della scena senza modificarlo, così il feedback
+viaggia col Player come il radar. Il suo profilo è l'aspetto al picco dello sparo, e il
+componente non lo tocca: ne muove soltanto il peso.
+
 Oltre agli eventi, il Manager espone uno **`Snapshot` in sola lettura**: è da lì che il
 connettore prende ciò che serve all'HUD, senza che lo State esca dal modulo.
 
@@ -231,6 +243,13 @@ anche quella del Player, inoltrata così com'è: il connettore non la traduce.
 **I marcatori d'impatto non sono asteroidi.** L'HUD ne riceve un punto sullo schermo e
 dei secondi, già in ordine di urgenza, e non sa cosa ci sia dietro. Quanti se ne possano
 disegnare lo dice l'UXML: se le minacce sono di più, restano fuori le meno vicine.
+
+**Le condizioni arrivano in fotografia, i fatti come notifiche.** Quanto è calda la
+mitraglietta è una condizione, e sta nello snapshot di ogni frame. «Il cannone è carico»
+invece è un fatto: succede una volta, e il connettore lo gira all'HUD con `Notify` nel
+momento in cui il Player lo dice. L'HUD non se ne accorge da solo confrontando due
+fotografie, perché per farlo dovrebbe ricordarsi quella di prima, cioè tenere uno State.
+Il connettore dice *cosa* è successo, l'HUD decide come si scrive e come compare.
 
 **Il mirino non legge il mouse.** Riceve la posizione di mira nello snapshot, che nasce
 dalla stessa sorgente da cui parte il colpo: se la leggesse per conto suo, il giorno in

@@ -54,7 +54,7 @@ All'inizio si può fare entrambe le cose. Verso la fine no.
 3. Il giocatore mira con la torretta e osserva quali asteroidi sono marcati come pericolosi.
 4. Sceglie l'arma adatta: raffica per i sassi lontani, cannone per il colpo che deve andare a segno.
 5. Abbatte gli asteroidi e accumula punti.
-6. Quando la mitraglietta si surriscalda passa al cannone; quando il cannone ricarica torna alla mitraglietta.
+6. Quando serve il colpo sicuro prende il cannone: sparato quello, la torretta rimette in mano la mitraglietta da sola.
 7. Gli asteroidi che sfuggono e colpiscono lo scafo tolgono un punto di resistenza.
 8. Il livello di minaccia sale e con lui il ritmo, la velocità e la precisione degli asteroidi.
 9. A scafo esaurito la partita finisce.
@@ -119,6 +119,10 @@ della torretta. Torna visibile nelle schermate in cui ci sono pulsanti da premer
 Il fuoco si comporta in modo diverso a seconda dell'arma: con la mitraglietta si
 **tiene premuto**, con il cannone si **clicca** — un click, un colpo.
 
+Dopo il colpo di cannone la torretta torna da sola alla mitraglietta, che però non
+riparte finché il tasto non viene rilasciato: il click del cannone non si porta dietro
+una raffica.
+
 ---
 
 ## 6. Player / Turret
@@ -145,14 +149,19 @@ A inizio partita la torretta è dritta davanti a sé e imbraccia la mitraglietta
 
 ## 7. Weapon System
 
-Il giocatore ha due armi e può passare dall'una all'altra in qualunque momento.
-Non sono due versioni della stessa arma: si giocano in modo diverso e servono a cose
-diverse.
+Il giocatore ha due armi. Non sono due versioni della stessa arma: si giocano in modo
+diverso e servono a cose diverse.
+
+**La mitraglietta è la posizione di riposo, il cannone è una scelta.** Si prende in mano
+solo quando è carico, si usa per un colpo, e subito dopo la torretta rimette in mano la
+mitraglietta. Non esiste quindi nessun momento in cui si tiene in mano un'arma che non
+può sparare.
 
 | | Mitraglietta | Cannone |
 |---|---|---|
 | Fuoco | A raffica, tenendo premuto | Un colpo per click |
 | Limite | Si surriscalda | Ricarica dopo ogni colpo |
+| Come si prende | Sempre disponibile, ci si torna da soli | Solo quando è carico, e per un colpo solo |
 | Potenza | Serve più di un colpo per abbattere un asteroide | Abbatte un asteroide in un colpo |
 | Uso ideale | Sgranare bersagli lontani, fare volume | Il sasso che sta per arrivare e non può sbagliare |
 
@@ -161,11 +170,14 @@ continuano a farlo **anche quando non sono in mano**: mentre si usa una, l'altra
 rimette in sesto.
 
 ```
-MITRAGLIETTA ──surriscalda──▶ CANNONE ──ricarica──▶ MITRAGLIETTA ──▶ …
+MITRAGLIETTA ──[Q, se il cannone è carico]──▶ CANNONE ──[un colpo]──▶ MITRAGLIETTA
+                                                                        │
+                        (il cannone ricarica in sottofondo, poi è di nuovo prendibile)
 ```
 
-L'intento è un'alternanza naturale: il giocatore non deve mai restare disarmato,
-ma deve sempre scegliere.
+L'intento è un'alternanza naturale: il giocatore non resta mai disarmato, e la domanda
+non è più «quale arma tengo», ma **«è questo il sasso per cui vale la pena spendere il
+cannone?»**.
 
 ---
 
@@ -195,9 +207,13 @@ RAFFICA → CALORE AL MASSIMO → BLOCCATA → RAFFREDDAMENTO COMPLETO → PRONT
 
 ### Feedback
 
-- una barra di calore a schermo, che diventa arancione quando è quasi piena e rossa quando l'arma è bloccata;
-- la scritta **OVERHEAT** al posto della percentuale mentre è bloccata;
-- il mirino diventa rosso finché non si può sparare.
+- una **barra di calore verticale a sinistra del mirino**, che compare appena l'arma si
+  scalda e sparisce quando è di nuovo fredda: arancione da quasi piena, rossa a blocco
+  avvenuto;
+- il mirino diventa rosso finché non si può sparare;
+- il **tono dello sparo sale col calore**: si sente arrivare il blocco prima che arrivi,
+  senza bisogno di guardare la barra;
+- un suono dedicato nel momento in cui l'arma si blocca.
 
 ---
 
@@ -209,14 +225,14 @@ primo impatto.
 ### Comportamento
 
 - si spara con un click: un click, un colpo;
-- dopo lo sparo entra subito in **ricarica**;
-- durante la ricarica non risponde al fuoco;
+- dopo lo sparo entra subito in **ricarica**, e la torretta torna da sola alla mitraglietta;
+- mentre ricarica non si può nemmeno prendere in mano: chi preme Q resta sulla mitraglietta;
 - la ricarica è breve, ma abbastanza da non poter contare sul cannone per tutto;
 - la ricarica prosegue anche mentre il giocatore usa la mitraglietta;
 - a inizio partita il cannone è carico.
 
 ```
-CLICK → COLPO → RICARICA → PRONTO
+CLICK → COLPO → si torna alla mitraglietta → RICARICA → PRONTO (di nuovo prendibile)
 ```
 
 ### Ruolo nel gioco
@@ -227,29 +243,35 @@ spreco, e il gioco vuole che il giocatore lo senta.
 
 ### Feedback
 
-- una barra di carica a schermo, piena quando il cannone è pronto, con la scritta **READY** o i secondi che mancano;
+- una **barra di carica verticale a destra del mirino**, che compare solo mentre il
+  cannone ricarica e sparisce quando il colpo è pronto;
+- una **notifica a schermo, in basso al centro, quando il cannone torna carico**,
+  accompagnata da un suono: è il momento in cui il giocatore riacquista la scelta, e
+  va detto nell'istante in cui succede;
 - il mirino cambia forma quando il cannone è in mano;
-- durante la ricarica sotto il mirino compare una piccola barra che si riempie; sparisce quando il colpo è pronto;
-- il mirino è rosso finché il cannone non può sparare.
+- il colpo lascia un **raggio** dalla canna al bersaglio, che resta un istante e svanisce.
 
 ---
 
 ## 10. Weapon Switching
 
-Il giocatore cambia arma con **Q** o con la rotella del mouse, in qualunque momento.
+Il giocatore chiama il cannone con **Q** o con la rotella del mouse. Il cambio ha una
+condizione sola: **il cannone deve essere carico**. Se non lo è, la richiesta non fa
+niente e si resta sulla mitraglietta.
 
 - il cambio è immediato;
 - non interrompe né il raffreddamento né la ricarica dell'arma che si lascia;
-- il mirino cambia forma per dire quale arma è in mano;
-- il nome dell'arma è sempre scritto a schermo.
+- dopo il colpo di cannone si torna alla mitraglietta senza premere niente;
+- il mirino cambia forma per dire quale arma è in mano: è l'unico posto in cui l'arma
+  è scritta, perché il reticolo si guarda già.
 
 Sequenza tipica:
 
 1. Il giocatore sgrana la mitraglietta sui sassi lontani.
 2. Un asteroide marcato scende sotto i due secondi.
-3. Passa al cannone e lo abbatte con un colpo.
-4. Torna alla mitraglietta, che nel frattempo si è raffreddata.
-5. Il cannone si ricarica in sottofondo, pronto per il prossimo pericolo.
+3. Chiama il cannone e lo abbatte con un colpo.
+4. Si ritrova la mitraglietta in mano, che nel frattempo si è raffreddata.
+5. Il cannone ricarica in sottofondo e annuncia da solo quando è di nuovo disponibile.
 
 ---
 
@@ -340,7 +362,8 @@ deve sempre vedere quanto margine gli resta.
 
 ### Feedback
 
-Lo stato dello scafo è sempre a schermo, con una barra e un numero:
+Lo stato dello scafo è sempre a schermo, in basso a sinistra, con il nome
+**SHIP INTEGRITY**: cinque segmenti che si spengono uno per impatto, e il numero accanto.
 
 | Scafo | Colore |
 |---|---|
@@ -348,6 +371,16 @@ Lo stato dello scafo è sempre a schermo, con una barra e un numero:
 | 2 | Arancione |
 | 1 | Rosso |
 | 0 | Game Over |
+
+Il numero però non basta, perché sta di lato e si guarda il cielo. Il danno si vede
+anche **sui bordi dello schermo, in rosso**, e racconta due cose insieme:
+
+- **quanto scafo manca** — un alone che resta addosso e si fa più fitto man mano che
+  la navicella si rovina;
+- **il colpo appena preso** — una vampata che sale sopra quell'alone e ci ritorna.
+
+Così un impatto si sente anche quando si sta guardando altrove, e a scafo basso lo
+schermo è chiuso abbastanza da ricordarlo senza che si debba leggere niente.
 
 ---
 
@@ -473,20 +506,36 @@ lo stesso linguaggio, come se fossero tre stati dello stesso terminale.
 
 ### Gameplay HUD
 
-Il terminale in alto a sinistra, con una riga per ciascun dato:
+**Ogni dato ha un posto, scelto in base a quanto spesso lo si guarda.** Un blocco solo
+pieno di righe obbliga a scandirle tutte per leggerne una, e mettere lo stato delle armi
+lontano dal mirino vuol dire staccare gli occhi dal bersaglio per sapere se si può
+premere. Quindi:
 
-- **T+** — tempo di partita, in minuti e secondi
-- **Score** — punteggio corrente
-- **Threat Lvl** — livello di minaccia, da 1 a 5
-- **Hull** — barra e numero dello scafo, con la scala di colore del §13
-- **Weapon** — l'arma in mano
-- **MG Heat** — barra di calore della mitraglietta e percentuale, oppure OVERHEAT
-- **Cannon** — barra di carica del cannone, READY oppure i secondi che mancano
+| Dove | Cosa | Perché lì |
+|---|---|---|
+| Addosso al mirino | calore e carica delle armi | si usano mentre si spara, lo sguardo è già lì |
+| In basso a sinistra | **Ship Integrity** | si deve vedere senza leggerlo, ma non deve stare in mezzo |
+| In alto al centro | **Mission Time** | si consulta, e al centro non compete con nient'altro |
+| In alto a destra | **Difficulty** | si consulta di rado, è il più lontano dall'azione |
+| In alto a sinistra | **Score**, sotto l'intestazione del terminale | è il dato che conta a fine partita, non durante |
+
+I nomi dicono cosa sono senza bisogno di conoscere il gioco: `T+` è diventato
+**MISSION TIME**, `HULL` è diventato **SHIP INTEGRITY**, e `THREAT LVL` è diventato
+**DIFFICULTY**: "threat" a schermo era già la parola dei marcatori d'impatto, e usarla
+per due cose diverse obbliga a chiedersi ogni volta di quale si stia parlando.
+
+**Le quantità piccole e intere si disegnano a segmenti**, non a barra: i 5 punti di
+integrità e i 5 livelli di minaccia sono cinque blocchi che si accendono e si spengono,
+con il numero accanto per chi vuole il dato esatto. Contare tre blocchi è più veloce che
+valutare quanto è piena una barra. La scala di colore è quella di sempre: verde, ambra
+vicino al limite, rosso sull'ultimo gradino.
 
 Sovrapposti al campo di gioco:
 
-- il **mirino**, al posto del cursore, con un reticolo diverso per ciascuna arma; rosso quando l'arma in mano non può sparare; con una barretta di ricarica sotto mentre il cannone ricarica;
-- i **marcatori d'impatto** del §12, con il conto alla rovescia.
+- il **mirino**, al posto del cursore, con un reticolo diverso per ciascuna arma, rosso quando l'arma in mano non può sparare;
+- le **due barre verticali ai lati del mirino**: a sinistra il calore della mitraglietta, a destra la carica del cannone. Ciascuna compare solo quando ha qualcosa da dire, quindi ad armi in ordine il mirino resta pulito;
+- i **marcatori d'impatto** del §12, con il conto alla rovescia;
+- le **notifiche**, in basso al centro: una riga che entra, resta un momento e svanisce. Oggi ne esiste una, `CANNON READY`.
 
 L'HUD non ha nulla su cui cliccare e non deve mai coprire il gioco.
 
@@ -523,6 +572,8 @@ davanti.
 
 - Modello della navicella e degli asteroidi con mesh vere e materiali semplici, su uno skybox stellato.
 - Gli asteroidi ruotano ciascuno a modo proprio: il cielo non deve mai sembrare fermo.
+- **Lo sparo si vede.** Ogni colpo di mitraglietta lascia un tracciante che corre fino al bersaglio; il cannone lascia un raggio che resta un istante e svanisce. Tutti e due partono dalla canna e arrivano dove è finito il colpo.
+- **Lo schermo reagisce.** Ogni colpo alza il bagliore generale per un istante — il cannone più della mitraglietta — e il danno chiude i bordi di rosso (§13). Sono gli unici due effetti che cambiano nel tempo: tutto il resto dell'immagine è fermo, quindi bastano a farsi notare.
 - L'interfaccia è l'unico elemento con colori di stato, sempre gli stessi tre:
   **verde** per ciò che va bene, **arancione** per l'avviso, **rosso** per il pericolo o il blocco.
 
@@ -537,9 +588,13 @@ Ciò che deve restare leggibile a colpo d'occhio, in ordine di importanza:
 ### Audio
 
 - Ogni arma ha il proprio suono di sparo, riconoscibile a orecchio.
+- Nessun suono è identico a sé stesso: il tono di ogni colpo varia leggermente, così una raffica non suona come un campione ripetuto.
+- **Il suono dice anche lo stato dell'arma:** il tono della mitraglietta sale col calore, e un suono dedicato segna il blocco.
+- Hanno una voce anche il **cambio arma**, il **cannone che torna carico** e il **radar che aggancia** un asteroide in rotta di collisione. Quest'ultimo parla per spazzata e non per sasso: tre minacce scoperte insieme sono un avviso, non tre.
 - Un asteroide colpito ma non abbattuto emette un suono di impatto.
 - Un asteroide abbattuto emette un suono di disintegrazione, nel punto in cui era.
 - I suoni non devono interrompersi perché l'asteroide è sparito.
+- Un fondo d'ambiente tiene la scena viva anche quando non succede niente.
 
 ---
 
@@ -548,6 +603,7 @@ Ciò che deve restare leggibile a colpo d'occhio, in ordine di importanza:
 - Il giocatore controlla una torretta su una navicella ferma, in prima persona.
 - La torretta segue il mirino e spara lungo la sua linea.
 - Il giocatore ha due armi: una mitraglietta che si surriscalda e un cannone a colpo singolo con ricarica.
+- La mitraglietta è l'arma di riposo; il cannone si può prendere in mano solo quando è carico, spara un colpo e poi restituisce la mitraglietta da solo.
 - Entrambe le armi recuperano da sole, anche quando non sono in mano.
 - La mitraglietta bloccata riparte solo a raffreddamento completo.
 - Il cannone abbatte un asteroide in un colpo; la mitraglietta ne ha bisogno di più.

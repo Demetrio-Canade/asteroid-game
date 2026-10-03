@@ -20,46 +20,109 @@
     background-color: rgba(0, 0, 0, 0);
 }
 
-/* Il terminale dell'HUD sta ancorato in alto a sinistra sopra il gioco. */
+/* ---------- i pannelli negli angoli ---------- */
 
-.terminal {
+/*
+ * Un blocco per dato, ciascuno nel suo angolo: leggerne uno non obbliga a
+ * scandire gli altri. Il riquadro e la palette vengono da Terminal.uss — qui
+ * c'è solo dove sta ciascuno e come è fatto dentro.
+ */
+
+.panel {
     position: absolute;
+}
+
+.panel--score {
     left: 24px;
     top: 24px;
 }
 
-/* ---------- le barre ---------- */
+.panel--time {
+    top: 24px;
+    left: 50%;
+    translate: -50% 0;
+    align-items: center;
+}
 
-.bar {
-    width: 96px;
-    height: 8px;
-    margin-right: 10px;
+.panel--difficulty {
+    top: 24px;
+    right: 24px;
+}
+
+/*
+ * L'integrità sta in basso a sinistra: fuori dalla zona in cui si spara, ma
+ * dentro il campo visivo periferico. È il dato che non si deve leggere.
+ */
+.panel--integrity {
+    left: 24px;
+    bottom: 24px;
+}
+
+.panel__label {
+    color: rgb(47, 143, 87);
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.panel__value {
+    color: rgb(182, 255, 207);
+    font-size: 22px;
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+}
+
+.panel__value--inline {
+    font-size: 15px;
+    margin-left: 10px;
+}
+
+.gauge-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* ---------- i segmenti ---------- */
+
+/*
+ * Cinque blocchi che si spengono uno alla volta. Cinque punti di scafo e cinque
+ * livelli di minaccia sono quantità piccole e intere: contarle a colpo d'occhio
+ * è più veloce che interpretare quanto è piena una barra.
+ */
+
+.pips {
+    flex-direction: row;
+    align-items: center;
+}
+
+.pip {
+    width: 16px;
+    height: 10px;
+    margin-right: 4px;
     background-color: rgba(74, 222, 128, 0.14);
     border-width: 1px;
     border-color: rgba(74, 222, 128, 0.35);
 }
 
-.bar__fill {
-    width: 0;
-    height: 100%;
+.pip.is-on {
     background-color: rgb(74, 222, 128);
 }
 
 /* ---------- soglie ---------- */
 
-.row.is-warn > .row__value {
+.panel.is-warn .panel__value {
     color: rgb(255, 176, 32);
 }
 
-.row.is-warn .bar__fill {
+.panel.is-warn .pip.is-on {
     background-color: rgb(255, 176, 32);
 }
 
-.row.is-critical > .row__value {
+.panel.is-critical .panel__value {
     color: rgb(255, 77, 77);
 }
 
-.row.is-critical .bar__fill {
+.panel.is-critical .pip.is-on {
     background-color: rgb(255, 77, 77);
 }
 
@@ -189,33 +252,66 @@
     translate: -50% -50%;
 }
 
-/* ---------- la ricarica del cannone ---------- */
+/* ---------- le barre dell'arma ---------- */
 
 /*
- * Compare solo mentre il cannone ricarica: una barra sempre piena sotto il
- * mirino sarebbe rumore. Stessi colori della riga CANNON del terminale —
- * ambra mentre recupera — perché è la stessa cosa detta più vicino al bersaglio.
+ * Due barre verticali ai lati del mirino, che lo seguono: a sinistra il calore
+ * della mitraglietta, a destra la carica del cannone. Stanno fuori dalle tacche
+ * del reticolo del cannone, che è il più largo dei due.
+ *
+ * Compaiono solo quando hanno qualcosa da dire — calore sopra zero, cannone in
+ * ricarica — e lo fanno in dissolvenza: a riposo il mirino resta pulito.
  */
-.charge {
+.gauge {
     position: absolute;
-    left: 0;
-    top: 28px;
-    width: 44px;
-    height: 3px;
-    translate: -50% 0;
+    top: 0;
+    width: 4px;
+    height: 34px;
+    translate: -50% -50%;
     background-color: rgba(74, 222, 128, 0.14);
     border-width: 1px;
     border-color: rgba(74, 222, 128, 0.35);
-    display: none;
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.15s;
 }
 
-.crosshair.is-charging .charge {
-    display: flex;
+.gauge--heat {
+    left: -36px;
 }
 
-.charge__fill {
-    width: 0;
-    height: 100%;
+.gauge--charge {
+    left: 36px;
+}
+
+.crosshair.is-heating .gauge--heat,
+.crosshair.is-charging .gauge--charge {
+    opacity: 1;
+}
+
+/* Si riempiono dal basso: il codice scrive l'altezza, non la larghezza. */
+.gauge__fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0;
+    background-color: rgb(74, 222, 128);
+}
+
+/* Il calore segue la scala di gravità di sempre: ambra vicino al blocco, rosso bloccata. */
+
+.gauge.is-warn .gauge__fill {
+    background-color: rgb(255, 176, 32);
+}
+
+.gauge.is-critical .gauge__fill {
+    background-color: rgb(255, 77, 77);
+}
+
+/* La carica è ambra mentre recupera: quando è piena la barra se ne va. */
+
+.gauge--charge .gauge__fill {
     background-color: rgb(255, 176, 32);
 }
 
@@ -240,7 +336,7 @@
  * il codice sposta quelli che servono e accende is-visible, e a farli comparire
  * è questa regola. Nessun colore e nessuna misura passano dal C#.
  *
- * Ambra come la riga CANNON del terminale finché c'è tempo, rossa sotto il
+ * Ambra come la carica del cannone finché c'è tempo, rossa sotto il
  * secondo: è la stessa scala di gravità delle barre, detta addosso al bersaglio.
  */
 
@@ -332,4 +428,38 @@
 
 .threat.is-imminent .threat__timer {
     color: rgb(255, 77, 77);
+}
+
+/* ---------- le notifiche ---------- */
+
+/*
+ * In basso al centro, staccata dal bordo. Entra dal basso con un piccolo
+ * rimbalzo ed esce in dissolvenza: il codice accende e spegne is-shown, il
+ * movimento è tutto qui.
+ */
+.notice {
+    position: absolute;
+    left: 50%;
+    bottom: 16%;
+    translate: -50% 18px;
+    scale: 0.85 0.85;
+    opacity: 0;
+    padding: 6px 18px 7px 14px;
+    background-color: rgba(2, 18, 8, 0.62);
+    border-left-width: 2px;
+    border-left-color: rgba(74, 222, 128, 0.75);
+    color: rgb(74, 222, 128);
+    font-size: 18px;
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition-property: opacity, translate, scale;
+    transition-duration: 0.25s, 0.35s, 0.35s;
+    transition-timing-function: ease-out, ease-out-back, ease-out-back;
+}
+
+.notice.is-shown {
+    translate: -50% 0;
+    scale: 1 1;
+    opacity: 1;
 }

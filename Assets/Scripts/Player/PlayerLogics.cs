@@ -20,6 +20,7 @@ public class PlayerLogics
     private readonly PlayerInputComponent input;
     private readonly HealthComponent health;
     private readonly RadarComponent radar;
+    private readonly FeedbackComponent feedback;
 
     /// <summary>La navicella è stata distrutta. Sale al Manager, che lo dice al connettore.</summary>
     public event Action OnDied;
@@ -27,13 +28,17 @@ public class PlayerLogics
     /// <summary>La torretta ha colpito un bersaglio, identificato dal nome del root.</summary>
     public event Action<string, float> OnAsteroidHit;
 
+    /// <summary>Il cannone ha finito di ricaricare.</summary>
+    public event Action OnCannonReady;
+
     public PlayerLogics(
         PlayerState state,
         AimLookComponent aimLook,
         TurretComponent turret,
         PlayerInputComponent input,
         HealthComponent health,
-        RadarComponent radar)
+        RadarComponent radar,
+        FeedbackComponent feedback)
     {
         this.state = state;
         this.aimLook = aimLook;
@@ -41,10 +46,16 @@ public class PlayerLogics
         this.input = input;
         this.health = health;
         this.radar = radar;
+        this.feedback = feedback;
     }
 
     public void Attach()
     {
+        if (radar != null)
+        {
+            radar.OnContactsAcquired += HandleContactsAcquired;
+        }
+
         if (health != null)
         {
             health.OnDie += HandleDie;
@@ -63,11 +74,20 @@ public class PlayerLogics
         if (turret != null)
         {
             turret.OnTargetHit += HandleTargetHit;
+            turret.OnShot += HandleShot;
+            turret.OnWeaponSelected += HandleWeaponSelected;
+            turret.OnCannonReady += HandleCannonReady;
+            turret.OnOverheated += HandleOverheated;
         }
     }
 
     public void Detach()
     {
+        if (radar != null)
+        {
+            radar.OnContactsAcquired -= HandleContactsAcquired;
+        }
+
         if (health != null)
         {
             health.OnDie -= HandleDie;
@@ -86,6 +106,10 @@ public class PlayerLogics
         if (turret != null)
         {
             turret.OnTargetHit -= HandleTargetHit;
+            turret.OnShot -= HandleShot;
+            turret.OnWeaponSelected -= HandleWeaponSelected;
+            turret.OnCannonReady -= HandleCannonReady;
+            turret.OnOverheated -= HandleOverheated;
         }
     }
 
@@ -116,6 +140,9 @@ public class PlayerLogics
 
         state.Ready = true;
         StateUpdate();
+
+        // Vita piena: il danno di una partita non deve sopravvivere al Retry.
+        feedback?.UpdateHealth(HealthRatio);
     }
 
     public void Despawn()
@@ -162,7 +189,13 @@ public class PlayerLogics
         // qui, altrimenti un colpo incassato fra un Tick e l'altro non si vedrebbe.
         health.ApplyDamage(damage);
         StateUpdate();
+
+        feedback?.UpdateHealth(HealthRatio);
+        feedback?.Damaged();
     }
+
+    /// <summary>Quanta vita resta, da 0 a 1.</summary>
+    private float HealthRatio => state.MaxHealth <= 0f ? 0f : Mathf.Clamp01(state.Health / state.MaxHealth);
 
     /// <summary>
     /// Fuori partita non gira niente: è questo che rende vero il "si bloccano
@@ -228,6 +261,36 @@ public class PlayerLogics
     private void HandleTargetHit(string target, float damage)
     {
         OnAsteroidHit?.Invoke(target, damage);
+    }
+
+    /// <summary>
+    /// Il calore si legge dalla torretta e non dallo State: il colpo è partito
+    /// adesso, e lo State lo saprà solo alla fine del Tick.
+    /// </summary>
+    private void HandleShot(ShotInfo shot)
+    {
+        feedback?.Shot(shot, turret.Snapshot.MachineGunHeat);
+    }
+
+    private void HandleWeaponSelected(TurretWeapon weapon)
+    {
+        feedback?.WeaponSelected(weapon);
+    }
+
+    private void HandleCannonReady()
+    {
+        feedback?.CannonReady();
+        OnCannonReady?.Invoke();
+    }
+
+    private void HandleOverheated()
+    {
+        feedback?.Overheated();
+    }
+
+    private void HandleContactsAcquired(int count)
+    {
+        feedback?.ContactAcquired();
     }
 
     /// <summary>

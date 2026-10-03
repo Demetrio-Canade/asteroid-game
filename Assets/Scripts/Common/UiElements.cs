@@ -73,14 +73,15 @@ public static class UiElements
     }
 
     /// <summary>
-    /// Riempie una barra: la larghezza in percentuale del suo contenitore.
-    /// Fuori da 0..1 non si va, così un dato storto non sfonda il disegno.
+    /// Riempie una barra verticale, dal basso: l'altezza in percentuale del suo
+    /// contenitore. Fuori da 0..1 non si va, così un dato storto non sfonda il
+    /// disegno.
     /// </summary>
-    public static void SetFill(this VisualElement fill, float ratio)
+    public static void SetVerticalFill(this VisualElement fill, float ratio)
     {
         if (fill != null)
         {
-            fill.style.width = Length.Percent(Mathf.Clamp01(ratio) * 100f);
+            fill.style.height = Length.Percent(Mathf.Clamp01(ratio) * 100f);
         }
     }
 

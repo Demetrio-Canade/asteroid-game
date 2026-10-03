@@ -4,55 +4,55 @@
 
     <ui:VisualElement name="hud-root" class="hud" picking-mode="Ignore">
 
-        <!-- Il terminale di bordo: righe di log, tutte in alto a sinistra. -->
-        <ui:VisualElement name="terminal" class="terminal" picking-mode="Ignore">
+        <!--
+            I dati della partita, divisi per quanto spesso si guardano invece
+            che raccolti in un blocco solo: quello che si consulta sta negli
+            angoli alti, quello che si deve vedere senza leggere sta in basso a
+            sinistra, e quello che si usa mentre si spara sta addosso al mirino.
 
+            I segmenti ci sono sempre tutti, come i marcatori d'impatto: il
+            codice ne accende quanti gliene servono. Quanti siano lo dice questo
+            file — cambiare i punti di scafo vuol dire aggiungere un blocco qui.
+        -->
+        <ui:VisualElement name="panel-score" class="terminal panel panel--score" picking-mode="Ignore">
             <ui:Label class="terminal__header" text="&gt; SHIP TERMINAL // ONLINE" />
-
-            <ui:VisualElement name="row-time" class="row">
-                <ui:Label class="row__key" text="&gt; T+" />
-                <ui:Label name="value-time" class="row__value" text="00:00" />
-            </ui:VisualElement>
-
-            <ui:VisualElement name="row-score" class="row">
+            <ui:VisualElement class="row">
                 <ui:Label class="row__key" text="&gt; SCORE" />
                 <ui:Label name="value-score" class="row__value" text="0" />
             </ui:VisualElement>
+        </ui:VisualElement>
 
-            <ui:VisualElement name="row-level" class="row">
-                <ui:Label class="row__key" text="&gt; THREAT LVL" />
-                <ui:Label name="value-level" class="row__value" text="1/5" />
-            </ui:VisualElement>
+        <ui:VisualElement name="panel-time" class="terminal panel panel--time" picking-mode="Ignore">
+            <ui:Label class="panel__label" text="MISSION TIME" />
+            <ui:Label name="value-time" class="panel__value" text="00:00" />
+        </ui:VisualElement>
 
-            <ui:VisualElement name="row-hull" class="row">
-                <ui:Label class="row__key" text="&gt; HULL" />
-                <ui:VisualElement class="bar">
-                    <ui:VisualElement name="fill-hull" class="bar__fill" />
+        <ui:VisualElement name="panel-difficulty" class="terminal panel panel--difficulty" picking-mode="Ignore">
+            <ui:Label class="panel__label" text="DIFFICULTY" />
+            <ui:VisualElement class="gauge-row">
+                <ui:VisualElement name="pips-difficulty" class="pips">
+                    <ui:VisualElement class="pip" />
+                    <ui:VisualElement class="pip" />
+                    <ui:VisualElement class="pip" />
+                    <ui:VisualElement class="pip" />
+                    <ui:VisualElement class="pip" />
                 </ui:VisualElement>
-                <ui:Label name="value-hull" class="row__value" text="5/5" />
+                <ui:Label name="value-level" class="panel__value panel__value--inline" text="1/5" />
             </ui:VisualElement>
+        </ui:VisualElement>
 
-            <ui:VisualElement name="row-weapon" class="row">
-                <ui:Label class="row__key" text="&gt; WEAPON" />
-                <ui:Label name="value-weapon" class="row__value" text="MACHINE GUN" />
-            </ui:VisualElement>
-
-            <ui:VisualElement name="row-machinegun" class="row">
-                <ui:Label class="row__key" text="&gt; MG HEAT" />
-                <ui:VisualElement class="bar">
-                    <ui:VisualElement name="fill-machinegun" class="bar__fill" />
+        <ui:VisualElement name="panel-integrity" class="terminal panel panel--integrity" picking-mode="Ignore">
+            <ui:Label class="panel__label" text="SHIP INTEGRITY" />
+            <ui:VisualElement class="gauge-row">
+                <ui:VisualElement name="pips-integrity" class="pips">
+                    <ui:VisualElement class="pip" />
+                    <ui:VisualElement class="pip" />
+                    <ui:VisualElement class="pip" />
+                    <ui:VisualElement class="pip" />
+                    <ui:VisualElement class="pip" />
                 </ui:VisualElement>
-                <ui:Label name="value-machinegun" class="row__value" text="0%" />
+                <ui:Label name="value-integrity" class="panel__value panel__value--inline" text="5/5" />
             </ui:VisualElement>
-
-            <ui:VisualElement name="row-cannon" class="row">
-                <ui:Label class="row__key" text="&gt; CANNON" />
-                <ui:VisualElement class="bar">
-                    <ui:VisualElement name="fill-cannon" class="bar__fill" />
-                </ui:VisualElement>
-                <ui:Label name="value-cannon" class="row__value" text="READY" />
-            </ui:VisualElement>
-
         </ui:VisualElement>
 
         <!--
@@ -142,12 +142,26 @@
                 <ui:VisualElement class="reticle__dot" />
             </ui:VisualElement>
 
-            <!-- Quanto manca al prossimo colpo: c'è solo mentre ricarica. -->
-            <ui:VisualElement class="charge">
-                <ui:VisualElement name="fill-charge" class="charge__fill" />
+            <!--
+                Le due barre dell'arma, ai lati del mirino perché lo sguardo sta
+                lì: a sinistra il calore della mitraglietta, a destra la carica
+                del cannone. Compaiono solo quando hanno qualcosa da dire.
+            -->
+            <ui:VisualElement name="gauge-heat" class="gauge gauge--heat">
+                <ui:VisualElement name="fill-heat" class="gauge__fill" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="gauge-charge" class="gauge gauge--charge">
+                <ui:VisualElement name="fill-charge" class="gauge__fill" />
             </ui:VisualElement>
 
         </ui:VisualElement>
+
+        <!--
+            Le notifiche: un fatto appena successo, detto una volta e poi via.
+            Il testo lo scrive Logics, l'entrata e l'uscita le fa l'USS.
+        -->
+        <ui:Label name="notice" class="notice" text="&gt; CANNON READY" />
 
     </ui:VisualElement>
 </ui:UXML>

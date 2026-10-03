@@ -192,6 +192,17 @@ public class GameplayLogics : MonoBehaviour
         EndGame();
     }
 
+    /// <summary>Il cannone del Player è di nuovo carico: l'HUD lo annuncia.</summary>
+    private void PlayerCannonReady()
+    {
+        if (!state.IsRunning)
+        {
+            return;
+        }
+
+        hud?.Notify(HudNotice.CannonReady);
+    }
+
     // ---------- LA PARTITA ----------
 
     /// <summary>Rimette la partita a zero: tempo, punti, difficoltà e ritmo di spawn.</summary>
@@ -434,6 +445,7 @@ public class GameplayLogics : MonoBehaviour
 
         player.OnDied += PlayerDied;
         player.OnAsteroidHit += PlayerHitAsteroid;
+        player.OnCannonReady += PlayerCannonReady;
     }
 
     private void UnsubscribeFromPlayer()
@@ -445,6 +457,7 @@ public class GameplayLogics : MonoBehaviour
 
         player.OnDied -= PlayerDied;
         player.OnAsteroidHit -= PlayerHitAsteroid;
+        player.OnCannonReady -= PlayerCannonReady;
     }
 
     /// <summary>

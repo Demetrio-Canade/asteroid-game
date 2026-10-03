@@ -43,7 +43,37 @@ public readonly struct TurretSnapshot
 }
 
 /// <summary>
-/// La torretta: ruota verso la mira, spara, suona, e tiene il conto di calore e
+/// Un colpo appena partito, visto da fuori: con che arma, da dove e fino a dove.
+///
+/// Il colpo vero è un raggio che parte dalla camera e arriva nello stesso
+/// istante. Questo invece è il colpo <b>da disegnare</b>: parte dalla bocca
+/// della canna e arriva dove il raggio ha colpito, o, se è andato a vuoto,
+/// sul punto di mira. Così qualunque effetto converge dove si è mirato.
+/// </summary>
+public readonly struct ShotInfo
+{
+    public readonly TurretWeapon Weapon;
+
+    /// <summary>La bocca della canna da cui è uscito, in coordinate di mondo.</summary>
+    public readonly Vector3 Origin;
+
+    /// <summary>Dove è arrivato, in coordinate di mondo.</summary>
+    public readonly Vector3 End;
+
+    /// <summary>Ha preso qualcosa, oppure è andato a vuoto.</summary>
+    public readonly bool Hit;
+
+    public ShotInfo(TurretWeapon weapon, Vector3 origin, Vector3 end, bool hit)
+    {
+        Weapon = weapon;
+        Origin = origin;
+        End = end;
+        Hit = hit;
+    }
+}
+
+/// <summary>
+/// La torretta: ruota verso la mira, spara, e tiene il conto di calore e
 /// ricariche. È lei l'autorità sulle armi — nessun altro decide se si può sparare.
 ///
 /// Non conosce il gioco: le si dà una mira e un tasto premuto, e restituisce
@@ -62,6 +92,8 @@ public class TurretComponent : MonoBehaviour
     [Header("Tiro")]
     [Tooltip("Cosa può essere colpito. Senza filtro il colpo prenderebbe la navicella stessa.")]
     [SerializeField] private LayerMask hitMask = 1 << 3;
+    [Tooltip("Le bocche delle canne, da cui escono gli effetti dei colpi. Con più di una si alternano. Vuoto, si usa il pivot della canna.")]
+    [SerializeField] private Transform[] muzzles;
 
     [Header("Mitraglietta")]
     [SerializeField] private float machineGunShotsPerSecond = 10f;
@@ -77,16 +109,28 @@ public class TurretComponent : MonoBehaviour
     [Header("Cannone")]
     [SerializeField] private float cannonCooldownDuration = 3f;
     [SerializeField] private float cannonDamage = 5f;
-
-    [Header("Audio")]
-    [SerializeField] private AudioSource shotAudio;
-    [SerializeField] private AudioClip machineGunClip;
-    [SerializeField] private AudioClip cannonClip;
+    [Tooltip("Dopo un colpo di cannone si torna da soli alla mitraglietta. Il cannone si può riselezionare solo quando è di nuovo carico.")]
+    [SerializeField] private bool returnToMachineGunAfterCannon = true;
 
     // ---------- OUTPUTS ----------
 
     /// <summary>Ha colpito qualcosa: il nome del suo root, e quanto danno vale il colpo.</summary>
     public event Action<string, float> OnTargetHit;
+
+    /// <summary>È partito un colpo, che vada a segno o no: con che arma, da dove e fino a dove.</summary>
+    public event Action<ShotInfo> OnShot;
+
+    /// <summary>
+    /// L'arma in mano è cambiata. Non parte al reset di inizio partita: quello
+    /// non è una scelta del giocatore.
+    /// </summary>
+    public event Action<TurretWeapon> OnWeaponSelected;
+
+    /// <summary>Il cannone ha finito di ricaricare. Non parte al reset di inizio partita.</summary>
+    public event Action OnCannonReady;
+
+    /// <summary>La mitraglietta ha raggiunto il calore massimo e si è bloccata.</summary>
+    public event Action OnOverheated;
 
     public TurretSnapshot Snapshot =>
         new TurretSnapshot(weapon, MachineGunHeatProgress, overheated, cannonCooldown, CannonCooldownProgress);
@@ -112,6 +156,14 @@ public class TurretComponent : MonoBehaviour
     private float cannonCooldown;
     private float shotTimer;
     private bool firedLastFrame;
+    private int nextMuzzle;
+
+    /// <summary>
+    /// Dopo il ritorno automatico dal cannone la mitraglietta non spara finché
+    /// il tasto non viene rilasciato: il click che ha sparato il cannone non
+    /// deve portarsi dietro una raffica.
+    /// </summary>
+    private bool waitForRelease;
 
     private AimData aim;
     private bool hasAim;
@@ -151,11 +203,28 @@ public class TurretComponent : MonoBehaviour
         cannonCooldown = 0f;
         shotTimer = 0f;
         firedLastFrame = false;
+        waitForRelease = false;
     }
 
+    /// <summary>
+    /// Passa all'arma indicata. Il cannone scarico non si può prendere in mano:
+    /// la richiesta cade nel vuoto e si resta dove si è.
+    /// </summary>
     public void SelectWeapon(TurretWeapon value)
     {
+        if (weapon == value)
+        {
+            return;
+        }
+
+        if (value == TurretWeapon.Cannon && cannonCooldown > 0f)
+        {
+            return;
+        }
+
         weapon = value;
+
+        OnWeaponSelected?.Invoke(weapon);
     }
 
     public void ToggleWeapon()
@@ -240,6 +309,11 @@ public class TurretComponent : MonoBehaviour
         if (cannonCooldown > 0f)
         {
             cannonCooldown = Mathf.Max(0f, cannonCooldown - deltaTime);
+
+            if (cannonCooldown <= 0f)
+            {
+                OnCannonReady?.Invoke();
+            }
         }
 
         if (shotTimer > 0f)
@@ -257,10 +331,15 @@ public class TurretComponent : MonoBehaviour
 
         this.fireHeld = fireHeld;
 
+        if (!fireHeld)
+        {
+            waitForRelease = false;
+        }
+
         if (weapon == TurretWeapon.MachineGun)
         {
             // Fuoco tenuto premuto, un colpo per volta secondo il rateo.
-            if (!fireHeld || overheated || shotTimer > 0f)
+            if (!fireHeld || waitForRelease || overheated || shotTimer > 0f)
             {
                 return;
             }
@@ -271,9 +350,10 @@ public class TurretComponent : MonoBehaviour
             if (heat >= maxHeat)
             {
                 overheated = true;
+                OnOverheated?.Invoke();
             }
 
-            Shoot(machineGunClip, machineGunDamage);
+            Shoot(machineGunDamage);
             return;
         }
 
@@ -286,19 +366,38 @@ public class TurretComponent : MonoBehaviour
         }
 
         cannonCooldown = cannonCooldownDuration;
-        Shoot(cannonClip, cannonDamage);
+        Shoot(cannonDamage);
+
+        if (returnToMachineGunAfterCannon)
+        {
+            ReturnToMachineGun();
+        }
     }
 
-    private void Shoot(AudioClip clip, float damage)
+    /// <summary>
+    /// Il ritorno automatico dopo il cannone. Non passa da SelectWeapon, e
+    /// quindi non annuncia un cambio arma: come il reset di inizio partita,
+    /// non è una scelta del giocatore.
+    /// </summary>
+    private void ReturnToMachineGun()
     {
-        if (shotAudio != null && clip != null)
-        {
-            shotAudio.PlayOneShot(clip);
-        }
+        weapon = TurretWeapon.MachineGun;
+        waitForRelease = true;
+    }
 
+    private void Shoot(float damage)
+    {
         // Le varianti degli asteroidi usano trigger per poter rilevare anche
         // l'impatto sulla navicella: devono quindi partecipare al raycast.
-        if (!Physics.Raycast(aim.ShotRay, out RaycastHit hit, Mathf.Infinity, hitMask, QueryTriggerInteraction.Collide))
+        bool hitSomething = Physics.Raycast(aim.ShotRay, out RaycastHit hit, Mathf.Infinity, hitMask, QueryTriggerInteraction.Collide);
+
+        OnShot?.Invoke(new ShotInfo(
+            weapon,
+            NextMuzzlePosition(),
+            hitSomething ? hit.point : aim.AimPoint,
+            hitSomething));
+
+        if (!hitSomething)
         {
             Debug.DrawRay(aim.ShotRay.origin, aim.ShotRay.direction * 100f, Color.yellow, 0.2f);
             return;
@@ -314,5 +413,22 @@ public class TurretComponent : MonoBehaviour
             : hit.transform.root.name;
 
         OnTargetHit?.Invoke(target, damage);
+    }
+
+    /// <summary>
+    /// Da quale canna esce il colpo: a turno, se sono più di una. Senza canne
+    /// dichiarate, dal pivot della canna, che almeno ruota con la mira.
+    /// </summary>
+    private Vector3 NextMuzzlePosition()
+    {
+        if (muzzles == null || muzzles.Length == 0)
+        {
+            return pitchPivot != null ? pitchPivot.position : aim.ShotRay.origin;
+        }
+
+        Transform muzzle = muzzles[nextMuzzle % muzzles.Length];
+        nextMuzzle = (nextMuzzle + 1) % muzzles.Length;
+
+        return muzzle != null ? muzzle.position : aim.ShotRay.origin;
     }
 }

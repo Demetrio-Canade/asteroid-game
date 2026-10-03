@@ -27,11 +27,15 @@ public class HudLogics
     private const string BlockedClass = "is-blocked";
     private const string CannonClass = "is-cannon";
     private const string ChargingClass = "is-charging";
+    private const string HeatingClass = "is-heating";
+    private const string ShownClass = "is-shown";
     private const string VisibleClass = "is-visible";
     private const string ImminentClass = "is-imminent";
 
     private const string ThreatClass = "threat";
     private const string ThreatTimerClass = "threat__timer";
+    private const string PipClass = "pip";
+    private const string PipOnClass = "is-on";
 
     /// <summary>Sotto questo tempo all'impatto il marcatore passa all'allarme.</summary>
     private const float ImminentSeconds = 1f;
@@ -39,9 +43,22 @@ public class HudLogics
     /// <summary>Sopra questa frazione di calore la mitraglietta è "quasi finita".</summary>
     private const float HeatWarnThreshold = 0.7f;
 
+    /// <summary>Quanto resta a schermo una notifica prima di andarsene, in millisecondi.</summary>
+    private const long NoticeHoldMs = 1400;
+
     private readonly VisualElement root;
     private readonly VisualElement crosshair;
+    private readonly VisualElement heatGauge;
+    private readonly VisualElement heatFill;
     private readonly VisualElement chargeFill;
+    private readonly Label notice;
+
+    /// <summary>
+    /// L'uscita programmata della notifica a schermo. Non è uno State del
+    /// gioco: è l'orologio di un'animazione, e serve solo a spostarla in avanti
+    /// se nel frattempo ne arriva un'altra.
+    /// </summary>
+    private IVisualElementScheduledItem noticeExit;
 
     // I marcatori d'impatto ci sono sempre tutti, come i due reticoli: si
     // raccolgono una volta sola e poi si accendono e si spengono. Quanti siano
@@ -49,28 +66,27 @@ public class HudLogics
     private readonly List<VisualElement> threatSlots;
     private readonly List<Label> threatTimers;
 
-    private readonly VisualElement hullRow;
-    private readonly VisualElement machineGunRow;
-    private readonly VisualElement cannonRow;
-
-    private readonly VisualElement hullFill;
-    private readonly VisualElement machineGunFill;
-    private readonly VisualElement cannonFill;
+    // I segmenti di integrità e di minaccia: ci sono sempre tutti, se ne
+    // accendono quanti servono. Quanti siano lo dice l'UXML.
+    private readonly VisualElement integrityPanel;
+    private readonly VisualElement difficultyPanel;
+    private readonly List<VisualElement> integrityPips;
+    private readonly List<VisualElement> difficultyPips;
 
     private readonly Label timeValue;
     private readonly Label scoreValue;
     private readonly Label levelValue;
-    private readonly Label hullValue;
-    private readonly Label weaponValue;
-    private readonly Label machineGunValue;
-    private readonly Label cannonValue;
+    private readonly Label integrityValue;
 
     public HudLogics(VisualElement root)
     {
         this.root = root;
 
         crosshair = root.GetVisualElement("crosshair");
+        heatGauge = root.GetVisualElement("gauge-heat");
+        heatFill = root.GetVisualElement("fill-heat");
         chargeFill = root.GetVisualElement("fill-charge");
+        notice = root.GetLabel("notice");
 
         threatSlots = root.GetVisualElementsByClass(ThreatClass);
         threatTimers = new List<Label>(threatSlots.Count);
@@ -79,21 +95,15 @@ public class HudLogics
             threatTimers.Add(slot.GetLabelByClass(ThreatTimerClass));
         }
 
-        hullRow = root.GetVisualElement("row-hull");
-        machineGunRow = root.GetVisualElement("row-machinegun");
-        cannonRow = root.GetVisualElement("row-cannon");
-
-        hullFill = root.GetVisualElement("fill-hull");
-        machineGunFill = root.GetVisualElement("fill-machinegun");
-        cannonFill = root.GetVisualElement("fill-cannon");
+        integrityPanel = root.GetVisualElement("panel-integrity");
+        difficultyPanel = root.GetVisualElement("panel-difficulty");
+        integrityPips = root.GetVisualElement("pips-integrity").GetVisualElementsByClass(PipClass);
+        difficultyPips = root.GetVisualElement("pips-difficulty").GetVisualElementsByClass(PipClass);
 
         timeValue = root.GetLabel("value-time");
         scoreValue = root.GetLabel("value-score");
         levelValue = root.GetLabel("value-level");
-        hullValue = root.GetLabel("value-hull");
-        weaponValue = root.GetLabel("value-weapon");
-        machineGunValue = root.GetLabel("value-machinegun");
-        cannonValue = root.GetLabel("value-cannon");
+        integrityValue = root.GetLabel("value-integrity");
 
         // L'HUD non ha niente su cui si possa cliccare: non deve nemmeno poter
         // intercettare un click diretto al gioco che sta sotto.
@@ -106,55 +116,43 @@ public class HudLogics
     {
         PresentRun(snapshot);
         PresentShip(snapshot.Player);
-        PresentWeapons(snapshot.Player);
         PresentCrosshair(snapshot.Player);
+        PresentGauges(snapshot.Player);
         PresentThreats(snapshot.Threats);
     }
 
-    /// <summary>Tempo, punti e difficoltà: i fatti della partita.</summary>
+    /// <summary>
+    /// Tempo, punti e difficoltà: i fatti della partita, quelli che si
+    /// consultano quando serve. La difficoltà sale di colore verso l'ultimo
+    /// gradino, perché "quanto è dura adesso" è un avviso e non un dato.
+    /// </summary>
     private void PresentRun(in HudSnapshot snapshot)
     {
         timeValue.SetText(UiFormat.Time(snapshot.ElapsedSeconds));
         scoreValue.SetText(UiFormat.Score(snapshot.Score));
-        levelValue.SetText($"{snapshot.DifficultyLevel}/{snapshot.DifficultyLevelCount}");
+
+        int level = snapshot.DifficultyLevel;
+        int levels = snapshot.DifficultyLevelCount;
+
+        levelValue.SetText($"{level}/{levels}");
+        SetPips(difficultyPips, level);
+        SetSeverity(difficultyPanel, level >= levels - 1, level >= levels);
     }
 
-    /// <summary>La vita della navicella, con la scala di colore del GDD §11.</summary>
+    /// <summary>
+    /// L'integrità della navicella, con la scala di colore del GDD §13. È un
+    /// numero piccolo e intero, quindi si disegna a segmenti: contarne tre
+    /// accesi è più veloce che valutare quanto è piena una barra.
+    /// </summary>
     private void PresentShip(in PlayerSnapshot player)
     {
         int health = Mathf.Max(0, Mathf.CeilToInt(player.Health));
         int maxHealth = Mathf.Max(0, Mathf.CeilToInt(player.MaxHealth));
 
-        hullValue.SetText($"{health}/{maxHealth}");
-        hullFill.SetFill(Ratio(player.Health, player.MaxHealth));
+        integrityValue.SetText($"{health}/{maxHealth}");
+        SetPips(integrityPips, health);
 
-        SetSeverity(hullRow, health <= 2, health <= 1);
-    }
-
-    /// <summary>Arma selezionata, calore della mitraglietta, ricarica del cannone.</summary>
-    private void PresentWeapons(in PlayerSnapshot player)
-    {
-        weaponValue.SetText(player.Weapon == TurretWeapon.MachineGun ? "MACHINE GUN" : "CANNON");
-
-        // Mitraglietta: la barra è il calore, quindi piena vuol dire ferma.
-        machineGunFill.SetFill(Mathf.Clamp01(player.MachineGunHeat));
-        machineGunValue.SetText(
-            player.MachineGunOverheated
-                ? "OVERHEAT"
-                : $"{Mathf.RoundToInt(Mathf.Clamp01(player.MachineGunHeat) * 100f)}%");
-
-        SetSeverity(
-            machineGunRow,
-            player.MachineGunHeat >= HeatWarnThreshold,
-            player.MachineGunOverheated);
-
-        // Cannone: la barra è la carica, quindi piena vuol dire pronto.
-        float charge = 1f - Mathf.Clamp01(player.CannonCooldownNormalized);
-        bool ready = player.CannonCooldown <= 0f;
-
-        cannonFill.SetFill(charge);
-        cannonValue.SetText(ready ? "READY" : $"{player.CannonCooldown:0.0}s");
-        SetSeverity(cannonRow, !ready, false);
+        SetSeverity(integrityPanel, health <= 2, health <= 1);
     }
 
     /// <summary>
@@ -165,7 +163,7 @@ public class HudLogics
     /// ribaltata prima di dare il punto al pannello, che poi ci mette del suo la
     /// scala del PanelSettings.
     ///
-    /// Qui si sposta un punto e si accendono tre classi. Che aspetto abbia il
+    /// Qui si sposta un punto e si accendono due classi. Che aspetto abbia il
     /// reticolo di ciascuna arma, e quanto sia grande, sta soltanto nell'USS:
     /// per questo si posiziona il contenitore e non il disegno.
     /// </summary>
@@ -192,16 +190,37 @@ public class HudLogics
         // giocano allo stesso modo, e non devono nemmeno somigliarsi.
         crosshair.SetClass(CannonClass, isCannon);
 
-        // La barretta esiste solo mentre il cannone ricarica: quando è pronto
-        // non avrebbe niente da dire, e sotto il mirino sarebbe solo rumore.
-        crosshair.SetClass(ChargingClass, isCannon && !cannonReady);
-        chargeFill.SetFill(1f - Mathf.Clamp01(player.CannonCooldownNormalized));
-
         // Rosso quando l'arma in mano non può sparare: il mirino dice anche
         // se in questo istante premere serve a qualcosa.
         crosshair.SetClass(
             BlockedClass,
             isCannon ? !cannonReady : player.MachineGunOverheated);
+    }
+
+    /// <summary>
+    /// Le due barre ai lati del mirino: il calore della mitraglietta a sinistra,
+    /// la carica del cannone a destra.
+    ///
+    /// Valgono per l'arma e non per quella in mano: il calore si smaltisce e il
+    /// cannone ricarica anche mentre si usa l'altra, ed è proprio lì che
+    /// servono. Ciascuna c'è solo quando ha qualcosa da dire — a canna fredda e
+    /// a cannone carico il mirino resta pulito.
+    /// </summary>
+    private void PresentGauges(in PlayerSnapshot player)
+    {
+        if (crosshair == null)
+        {
+            return;
+        }
+
+        float heat = Mathf.Clamp01(player.MachineGunHeat);
+
+        crosshair.SetClass(HeatingClass, heat > 0f);
+        heatFill.SetVerticalFill(heat);
+        SetSeverity(heatGauge, heat >= HeatWarnThreshold, player.MachineGunOverheated);
+
+        crosshair.SetClass(ChargingClass, player.CannonCooldown > 0f);
+        chargeFill.SetVerticalFill(1f - Mathf.Clamp01(player.CannonCooldownNormalized));
     }
 
     /// <summary>
@@ -255,20 +274,68 @@ public class HudLogics
         }
     }
 
+    // ---------- NOTIFICHE ----------
+
+    /// <summary>
+    /// Annuncia un fatto appena successo: la scritta entra, resta un momento e
+    /// se ne va. Se ne arriva un'altra mentre è a schermo, riparte da capo.
+    ///
+    /// Qui si decidono il testo e i tempi; l'entrata e l'uscita sono una
+    /// transizione dell'USS, che scatta accendendo e spegnendo una classe.
+    /// </summary>
+    public void Notify(HudNotice value)
+    {
+        if (notice == null)
+        {
+            return;
+        }
+
+        notice.SetText(NoticeText(value));
+
+        // Spenta e riaccesa al frame dopo: se era già a schermo, la transizione
+        // riparte e l'entrata si rivede invece di non succedere niente.
+        noticeExit?.Pause();
+        notice.SetClass(ShownClass, false);
+        notice.schedule.Execute(() => notice.SetClass(ShownClass, true));
+
+        noticeExit = notice.schedule
+            .Execute(() => notice.SetClass(ShownClass, false))
+            .StartingIn(NoticeHoldMs);
+    }
+
+    private static string NoticeText(HudNotice value)
+    {
+        switch (value)
+        {
+            case HudNotice.CannonReady:
+                return "> CANNON READY";
+            default:
+                return string.Empty;
+        }
+    }
+
     // ---------- UTILITÀ ----------
 
     /// <summary>
     /// Le soglie di colore sono classi, non colori scritti a codice: il giorno
     /// in cui il verde diventa un altro verde si tocca solo l'USS.
     /// </summary>
-    private static void SetSeverity(VisualElement row, bool warn, bool critical)
+    private static void SetSeverity(VisualElement element, bool warn, bool critical)
     {
-        row.SetClass(WarnClass, warn && !critical);
-        row.SetClass(CriticalClass, critical);
+        element.SetClass(WarnClass, warn && !critical);
+        element.SetClass(CriticalClass, critical);
     }
 
-    private static float Ratio(float value, float max)
+    /// <summary>
+    /// Accende i primi <paramref name="count"/> segmenti e spegne gli altri.
+    /// Se i segmenti dell'UXML sono meno del valore, si accendono tutti: a
+    /// schermo il numero accanto resta comunque la verità.
+    /// </summary>
+    private static void SetPips(List<VisualElement> pips, int count)
     {
-        return max <= 0f ? 0f : Mathf.Clamp01(value / max);
+        for (int i = 0; i < pips.Count; i++)
+        {
+            pips[i].SetClass(PipOnClass, i < count);
+        }
     }
 }
